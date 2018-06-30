@@ -10,38 +10,37 @@ import org.springframework.web.util.UriComponentsBuilder;
 import br.com.usp.labis.bean.GoAnnotation;
 import br.com.usp.labis.bean.GoSearchResult;
 import br.com.usp.labis.bean.Protein;
+import br.com.usp.labis.useful.GoAnnotationFilter;
 
 @Component
 public class GoAnnotationService {
-	
+
 	private final String BASE_URL = "https://www.ebi.ac.uk/QuickGO/services/annotation/search";
+	private final String PROTEIN_IDS = "Protein IDs";
 
-	public List<GoAnnotation> getGoAnnotationsForProteinAndTaxon(Protein protein, Integer taxonId) {
+	public Protein getGoAnnotationsForProteinAndTaxon(Protein protein, GoAnnotationFilter filters) {
 		System.out.println("ANNOTATION FOR protein =>>>> " + protein.getProteinId());
-		System.out.println("ANNOTATION FOR taxon =>>>> " + taxonId);
-
-		List<GoAnnotation> annotations = null;
-		RestTemplate restTemplate = new RestTemplate();
-		URI targetUrl= UriComponentsBuilder.fromUriString(BASE_URL)  // Build the url
-			    .queryParam("geneProductId", protein.getProteinId()) // Add query params
-			    .queryParam("taxonId", taxonId)        				  
-			    .build()                                            
-			    .encode()                                            
-			    .toUri(); 
+		System.out.println("ANNOTATION FOR taxon =>>>> " + filters.getTaxonId());
 
 		try {
-			
-			GoSearchResult goSearchResult = restTemplate.getForObject(targetUrl, GoSearchResult.class);
-			annotations = (List<GoAnnotation>) (Object)  goSearchResult.getResults();
-			
+			if (!protein.getProteinId().equalsIgnoreCase(PROTEIN_IDS)) {
+				RestTemplate restTemplate = new RestTemplate();
+				URI targetUrl = UriComponentsBuilder.fromUriString(BASE_URL) // Build the url
+						.queryParam("geneProductId", protein.getProteinId()) // Add query params
+						.queryParam("taxonId", filters.getTaxonId()).build().encode().toUri();
+
+				GoSearchResult goSearchResult = restTemplate.getForObject(targetUrl, GoSearchResult.class);
+				List<GoAnnotation> annotations = (List<GoAnnotation>) (Object) goSearchResult.getResults();
+				protein.setGoAnnotations(annotations);
+
+				System.out.println("ANNOTATIONS SIZE =>>>> " + annotations.size());
+			}
+
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 		}
-		
-		System.out.println("ANNOTATIONS SIZE =>>>> " + annotations.size());
 
-		return annotations;
+		return protein;
 	}
 
-	
 }

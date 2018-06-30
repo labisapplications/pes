@@ -14,6 +14,8 @@ public class Protein {
 	private Float ttestPvalue;
 	private String geneName;
 	private List<Condition> conditions;
+	private List<GoAnnotation> goAnnotations;
+	private Integer taxonId;
 
 	public String getProteinId() {
 		return proteinId;
@@ -69,6 +71,30 @@ public class Protein {
 
 	public void setGeneNames(String geneName) {
 		this.geneName = geneName;
+	}
+
+	public String getGeneName() {
+		return geneName;
+	}
+
+	public void setGeneName(String geneName) {
+		this.geneName = geneName;
+	}
+
+	public List<GoAnnotation> getGoAnnotations() {
+		return goAnnotations;
+	}
+
+	public void setGoAnnotations(List<GoAnnotation> goAnnotations) {
+		this.goAnnotations = goAnnotations;
+	}
+
+	public Integer getTaxonId() {
+		return taxonId;
+	}
+
+	public void setTaxonId(Integer taxonId) {
+		this.taxonId = taxonId;
 	}
 
 	@Override
