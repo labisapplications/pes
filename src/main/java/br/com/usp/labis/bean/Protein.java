@@ -2,6 +2,9 @@ package br.com.usp.labis.bean;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Protein {
 
 	private String proteinId;
@@ -9,7 +12,7 @@ public class Protein {
 	private Float ttestSignificant;
 	private Float anovaPvalue;
 	private Float ttestPvalue;
-	private String geneNames;
+	private String geneName;
 	private List<Condition> conditions;
 
 	public String getProteinId() {
@@ -61,18 +64,18 @@ public class Protein {
 	}
 
 	public String getGeneNames() {
-		return geneNames;
+		return geneName;
 	}
 
-	public void setGeneNames(String geneNames) {
-		this.geneNames = geneNames;
+	public void setGeneNames(String geneName) {
+		this.geneName = geneName;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((geneNames == null) ? 0 : geneNames.hashCode());
+		result = prime * result + ((geneName == null) ? 0 : geneName.hashCode());
 		result = prime * result + ((proteinId == null) ? 0 : proteinId.hashCode());
 		return result;
 	}
@@ -86,10 +89,10 @@ public class Protein {
 		if (getClass() != obj.getClass())
 			return false;
 		Protein other = (Protein) obj;
-		if (geneNames == null) {
-			if (other.geneNames != null)
+		if (geneName == null) {
+			if (other.geneName != null)
 				return false;
-		} else if (!geneNames.equals(other.geneNames))
+		} else if (!geneName.equals(other.geneName))
 			return false;
 		if (proteinId == null) {
 			if (other.proteinId != null)

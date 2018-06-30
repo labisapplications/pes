@@ -2,6 +2,9 @@ package br.com.usp.labis.bean;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Condition {
 
 	private String name;

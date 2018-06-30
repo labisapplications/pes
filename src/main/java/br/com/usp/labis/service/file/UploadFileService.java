@@ -53,7 +53,7 @@ public class UploadFileService {
 		try {
 
 			if (file.delete()) {
-				System.out.println(file.getName() + " is deleted!");
+				System.out.println(file.getName() + " was deleted!");
 			} else {
 				System.out.println("Delete operation is failed.");
 			}

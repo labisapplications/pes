@@ -1,5 +1,8 @@
 package br.com.usp.labis.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Replicate {
 
 	private String name;

@@ -28,7 +28,6 @@ public class ExcelReaderService {
 	private final String PROTEIN_IDS = "Protein IDs";
 	private final String GENE_NAMES = "Gene names";
 	private final String LFQ_INTENSITY = "LFQ intensity";
-	private final String ANOVA_PVALUE = "ANOVA p value";
 
 	/**
 	 * Process excel data file to extract proteins, conditions and replicates.
@@ -153,11 +152,28 @@ public class ExcelReaderService {
 
 		// protein
 		Protein protein = new Protein();
-		protein.setProteinId(proteinNames);
 		protein.setConditions(new ArrayList<Condition>());
+		try {
+			//just considerer the first protein id in the list of protein'ids because it is probably the most significant
+			if(proteinNames != null) {
+				String[] proteinIdsArray = proteinNames.split(";");
+				protein.setProteinId(proteinIdsArray[0]);			}
+		
+		} catch (RuntimeException e) {
+			System.out.println("Error to get protein id" + proteinNames + " => gene is null");
+		}
+
+
+
 
 		try {
-			protein.setGeneNames((String) rowColumns.get(geneNames.get(GENE_NAMES).get(0)));
+			//just considerer the first gene in the list of genes because it is probably the most significant
+			String geneNamesValue = (String) rowColumns.get(geneNames.get(GENE_NAMES).get(0));
+			if(geneNamesValue != null) {
+				String[] geneNamesValuesArray = geneNamesValue.split(";");
+				protein.setGeneNames(geneNamesValuesArray[0]);
+			}
+		
 		} catch (RuntimeException e) {
 			System.out.println("Error protein " + proteinNames + " => gene is null");
 		}

@@ -12,6 +12,8 @@ import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 import br.com.usp.labis.service.file.ExcelReaderService;
 import br.com.usp.labis.service.file.UploadFileService;
+import br.com.usp.labis.service.go.GeneProductService;
+import br.com.usp.labis.service.go.GoAnnotationService;
 import br.com.usp.labis.service.statistic.StatisticService;
 
 @Component
@@ -27,6 +29,12 @@ public class EnrichmentAnalysisService {
 
 	@Autowired
 	private StatisticService statisticService;
+	
+	@Autowired
+	private GeneProductService geneProductService;
+	
+	@Autowired
+	private GoAnnotationService goAnnotationService;
 
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
@@ -56,12 +64,17 @@ public class EnrichmentAnalysisService {
 					System.out.println("---REPLICATE => " + replicate.getValue());
 				}
 			}
-
-			statisticService.oneWayAnovaTest(protein.getConditions());
-			statisticService.tTest(protein.getConditions());
+			
+			//to calculate the ttest or anova test for protein
+			if(protein.getConditions().size() > 2) {
+				statisticService.oneWayAnovaTest(protein.getConditions());
+			} else {
+				statisticService.tTest(protein.getConditions());
+			}
+			//geneProductService.getGeneProductService(protein);
+			goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, 9606);
 
 			System.out.println("-------------------end--------------------");
 		}
-
 	}
 }
