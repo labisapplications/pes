@@ -3,6 +3,7 @@ package br.com.usp.labis.useful;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -74,5 +75,22 @@ public class DataUtil {
 			}
 		}
 		return conditionsCv;
+	}
+	
+	public static void filterGoTermsAndProteins(Map<String, List<Protein>> goTermWithProteins, Map<String, List<Protein>> goTermWithProteinsFiltered,
+			Integer minProteinsPerGoTerm) {
+		
+		Iterator it = goTermWithProteins.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pairs = (Map.Entry) it.next();
+			List<Protein> proteinsGoTerm = (List<Protein>) pairs.getValue();
+			if(!proteinsGoTerm.isEmpty() && proteinsGoTerm.size() >= minProteinsPerGoTerm) {
+				goTermWithProteinsFiltered.put((String) pairs.getKey(), new ArrayList<Protein>());
+				for(Protein protein :  proteinsGoTerm) {
+					goTermWithProteinsFiltered.get((String) pairs.getKey()).add(protein);
+					System.out.println(pairs.getKey() + " = " +protein.getProteinId());
+				}
+			}
+		}	
 	}
 }

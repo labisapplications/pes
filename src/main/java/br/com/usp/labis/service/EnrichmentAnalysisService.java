@@ -62,7 +62,11 @@ public class EnrichmentAnalysisService {
 
 	private Double maxStatisticTest;
 
-	private Map<String, List<Protein>> gotermWithProteins; // GO_ID : proteins related
+	private Map<String, List<Protein>> goTermWithProteins; // GO_ID : proteins related
+	
+	private Map<String, List<Protein>> goTermWithProteinsFiltered; // GO_ID : proteins related after filters
+	
+	private Map<String, List<Protein>> goTermWeight; // GO_ID : weight
 
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
@@ -71,7 +75,7 @@ public class EnrichmentAnalysisService {
 	 * @param file
 	 *            file with data to be analysed
 	 */
-	public void processEnrichmentAnalysis(MultipartFile file) {
+	public void processEnrichmentAnalysis(MultipartFile file, Integer minProteinsPerGoTerm) {
 
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
@@ -95,6 +99,8 @@ public class EnrichmentAnalysisService {
 			
 			//associate each go id to the proteins in the data file
 			this.mapGoTermsAndProteins(proteins);
+			
+			DataUtil.filterGoTermsAndProteins(goTermWithProteins, goTermWithProteinsFiltered, minProteinsPerGoTerm);
 			
 			//calculate weigth for each goterm and filter go terms according to the filters
 
@@ -160,31 +166,24 @@ public class EnrichmentAnalysisService {
 	}
 
 	private void mapGoTermsAndProteins(List<Protein> proteins) {
-		gotermWithProteins = new HashMap<String, List<Protein>> ();
+		goTermWithProteins = new HashMap<String, List<Protein>> ();
+		goTermWithProteinsFiltered = new HashMap<String, List<Protein>> ();
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
 				for(GoAnnotation annotation :  protein.getGoAnnotations()) {
-					if (gotermWithProteins.get(annotation.getGoId()) == null) {
-						gotermWithProteins.put(annotation.getGoId(), new ArrayList<Protein>());
+					if (goTermWithProteins.get(annotation.getGoId()) == null) {
+						goTermWithProteins.put(annotation.getGoId(), new ArrayList<Protein>());
 					}
-					if(!gotermWithProteins.get(annotation.getGoId()).contains(protein)) {
-						gotermWithProteins.get(annotation.getGoId()).add(protein);
+					if(!goTermWithProteins.get(annotation.getGoId()).contains(protein)) {
+						goTermWithProteins.get(annotation.getGoId()).add(protein);
 					}
 				}
 			}
 		}
-		
-		Iterator it = gotermWithProteins.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pairs = (Map.Entry) it.next();
-			List<Protein> proteinsGoTerm = (List<Protein>) pairs.getValue();
-			for(Protein protein :  proteinsGoTerm) {
-				System.out.println(pairs.getKey() + " = " +protein.getProteinId());
-			}
-
-		}
 	}
 
+	
+	
 	private void getGoAntologyForAnnotations(List<Protein> proteins) {
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
