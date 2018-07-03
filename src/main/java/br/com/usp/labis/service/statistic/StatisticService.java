@@ -84,7 +84,7 @@ public class StatisticService {
 	 * @param values
 	 */
 	public double calculateStandardDeviation(double[] values) {
-		StandardDeviation sd = new StandardDeviation(false);
+		StandardDeviation sd = new StandardDeviation(true);
 		return sd.evaluate(values);
 	}
 
@@ -107,7 +107,8 @@ public class StatisticService {
 			double cv = stdeviation / (mean + 0.0000000001); // add 0.0000000001 so it will never go on zero division
 																// error
 			condition.setCv(cv);
-
+			
+			System.out.println("condition stdv " + stdeviation);
 			System.out.println("condition mean " + condition.getMean());
 			System.out.println("condition cv " + condition.getCv());
 
@@ -193,7 +194,7 @@ public class StatisticService {
 
 				condition.setWeight(weight);
 
-				System.out.println("Weight: " + weight);
+				System.out.println(protein.getProteinId() + " - Weight: " + weight);
 			}
 		}
 	}
@@ -245,6 +246,6 @@ public class StatisticService {
 		}
 		
 		DataUtil.printGoTermConditionWeights(goTermWeightPerCondition);
-
+		System.out.println("GoTerm weight was calculated");
 	}
 }

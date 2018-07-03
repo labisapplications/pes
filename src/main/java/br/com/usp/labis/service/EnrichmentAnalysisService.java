@@ -3,12 +3,14 @@ package br.com.usp.labis.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,6 +69,7 @@ public class EnrichmentAnalysisService {
 	
 	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ;
 	
+	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
 	 * over expressed genes.
@@ -89,7 +92,9 @@ public class EnrichmentAnalysisService {
 		filters.setTaxonId(9606);
 
 		if (proteins != null && !proteins.isEmpty()) {
-
+			
+			proteins = DataUtil.removeWhatIsNotProteinData(proteins);
+			
 			// get test t or anova for conditions, get max cv, mean and ttest
 			this.getStatistics(proteins);
 
@@ -108,9 +113,11 @@ public class EnrichmentAnalysisService {
 			// this.getGoAntologyForAnnotations(proteins);
 		}
 	}
-
+	
 	private void getStatistics(List<Protein> proteins) {
+		
 		for (Protein protein : proteins) {
+			
 			System.out.println("-------------------begin------------------");
 			System.out.println("-PROTEIN => " + protein.getProteinId());
 			System.out.println("-GENE => " + protein.getGeneNames());
@@ -157,9 +164,7 @@ public class EnrichmentAnalysisService {
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
 				System.out.println("Protein: " + protein.getProteinId());
 				this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
-			} else {
-				System.out.println("go id for protein => " + protein.getGoAnnotations().get(0).getGoId());
-			}
+			} 
 		}
 		System.out.println("The search for annotations is ended!!!");
 	}
@@ -179,6 +184,8 @@ public class EnrichmentAnalysisService {
 				}
 			}
 		}
+		System.out.println("The mapping is finished!!!");
+
 	}
 
 	

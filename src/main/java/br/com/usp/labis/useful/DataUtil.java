@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 
 public class DataUtil {
+	
+	private static final String PROTEIN_IDS = "Protein IDs";
 
 	public static double[] getReplicatesValuesForCondition(Condition condition) {
 
@@ -59,7 +62,6 @@ public class DataUtil {
 		List<Double> statistics = new ArrayList<Double>();
 		for (Protein protein : proteins) {
 			if(protein.getStatisticTest() >= 0.00) {
-				System.out.println("getStatisticTest " + protein.getStatisticTest());
 				statistics.add(protein.getStatisticTest());	
 			}
 		}
@@ -91,10 +93,18 @@ public class DataUtil {
 				goTermWithProteinsFiltered.put((String) pairs.getKey(), new ArrayList<Protein>());
 				for(Protein protein :  proteinsGoTerm) {
 					goTermWithProteinsFiltered.get((String) pairs.getKey()).add(protein);
-					System.out.println(pairs.getKey() + " = " +protein.getProteinId());
+					System.out.println(pairs.getKey() + " = " + protein.getProteinId());
 				}
 			}
-		}	
+		}
+		System.out.println("Filters applied");
+
+	}
+	
+	public static List<Protein> removeWhatIsNotProteinData(List<Protein> proteins) {
+		List<Protein> filteredList = proteins.stream().filter(i -> i.getProteinId() != null && 
+				i.getProteinId() != "" && !i.getProteinId().equalsIgnoreCase(PROTEIN_IDS)).collect(Collectors.toList());
+		return filteredList;
 	}
 	
 	public static void printGoTermConditionWeights(HashMap<String, HashMap<String, Double>> goTermWeightPerCondition) {
