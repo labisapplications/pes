@@ -3,7 +3,6 @@ package br.com.usp.labis.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -66,8 +65,8 @@ public class EnrichmentAnalysisService {
 	
 	private Map<String, List<Protein>> goTermWithProteinsFiltered; // GO_ID : proteins related after filters
 	
-	private Map<String, List<Protein>> goTermWeight; // GO_ID : weight
-
+	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ;
+	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
 	 * over expressed genes.
@@ -91,7 +90,7 @@ public class EnrichmentAnalysisService {
 
 		if (proteins != null && !proteins.isEmpty()) {
 
-			// get test t or anova for conditions
+			// get test t or anova for conditions, get max cv, mean and ttest
 			this.getStatistics(proteins);
 
 			// get annotations for each protein
@@ -103,7 +102,7 @@ public class EnrichmentAnalysisService {
 			DataUtil.filterGoTermsAndProteins(goTermWithProteins, goTermWithProteinsFiltered, minProteinsPerGoTerm);
 			
 			//calculate weigth for each goterm and filter go terms according to the filters
-
+			statisticService.calculateGoTermWeight(goTermWithProteinsFiltered, proteins, goTermWeightPerCondition);
 			
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);

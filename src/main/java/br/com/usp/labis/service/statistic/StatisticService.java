@@ -152,14 +152,14 @@ public class StatisticService {
 		}
 		return conditionMaxCv;
 	}
-	
+
 	/**
 	 * Get the max statistic test for condition
 	 * 
 	 * @param statisticsTests
-	 *            all tests 
+	 *            all tests
 	 */
-	public  Double getMaxStatisticTest(List<Double> statisticsTests) {
+	public Double getMaxStatisticTest(List<Double> statisticsTests) {
 		Double maxStat = DataUtil.getMaxValueFromList(statisticsTests);
 		System.out.println("maxTest: " + maxStat);
 		return maxStat;
@@ -167,17 +167,20 @@ public class StatisticService {
 
 	/**
 	 * Calculate the protein weight for each condition.
-	 * @param List<Protein> proteins
+	 * 
+	 * @param List<Protein>
+	 *            proteins
 	 * @param maxMean
 	 * @param maxCv
 	 * @param maxStatisticTest
 	 **/
-	public void calculateProteinWeightForEachCondition (List<Protein> proteins, Map<String, Double> maxMeans,
+	public void calculateProteinWeightForEachCondition(List<Protein> proteins, Map<String, Double> maxMeans,
 			Map<String, Double> maxCvs, Double maxStatisticTests) {
-		
-		for(Protein protein : proteins) {
+		System.out.println("maxStatisticTests: " + maxStatisticTests);
+
+		for (Protein protein : proteins) {
 			for (Condition condition : protein.getConditions()) {
-				
+
 				Double maxMeanCondition = maxMeans.get(condition.getName());
 				Double maxCvCondition = maxCvs.get(condition.getName());
 				Double maxStatisticTestCondition = maxStatisticTests;
@@ -185,12 +188,63 @@ public class StatisticService {
 				Double cvp = maxMeanCondition / maxCvCondition;
 				Double test = maxMeanCondition / maxStatisticTestCondition;
 
-				Double weight = ( condition.getMean() - 0.5 * cvp - 0.5 * test + maxMeanCondition - 1 ) / (2 * maxMeanCondition - 2 );
-				
+				Double weight = (condition.getMean() - 0.5 * cvp - 0.5 * test + maxMeanCondition - 1)
+						/ (2 * maxMeanCondition - 2);
+
 				condition.setWeight(weight);
-				
+
 				System.out.println("Weight: " + weight);
 			}
 		}
+	}
+
+	/**
+	 * Calculate the weight of the goId for each condition (condition: go_id:
+	 * weight)
+	 * 
+	 * @param Map<String,
+	 *            List<Protein>> goTermWithProteinsFiltered
+	 * @param proteins
+	 **/
+	public void calculateGoTermWeight(Map<String, List<Protein>> goTermWithProteinsFiltered, List<Protein> proteins,
+			HashMap<String, HashMap<String, Double>> goTermWeightPerCondition) {
+
+		goTermWeightPerCondition = new HashMap<String, HashMap<String, Double>>();
+
+		Iterator it = goTermWithProteinsFiltered.entrySet().iterator();
+
+		while (it.hasNext()) {
+
+			Map.Entry pairs = (Map.Entry) it.next();
+			List<Protein> proteinsGoTerm = (List<Protein>) pairs.getValue();
+
+			for (Protein proteinGoTerm : proteinsGoTerm) {
+
+				for (Protein protein : proteins) {
+					if (protein.getProteinId().equalsIgnoreCase(proteinGoTerm.getProteinId())) {
+
+						for (Condition condition : protein.getConditions()) {
+
+							if (goTermWeightPerCondition.get(condition.getName()) == null) {
+								goTermWeightPerCondition.put(condition.getName(), new HashMap<String, Double>());
+							}
+							
+							if (goTermWeightPerCondition.get(condition.getName())
+									.get((String) pairs.getKey()) == null) {
+								goTermWeightPerCondition.get(condition.getName()).put((String) pairs.getKey(),
+										condition.getWeight());
+							} else {
+								goTermWeightPerCondition.get(condition.getName()).put((String) pairs.getKey(),
+										goTermWeightPerCondition.get(condition.getName()).get((String) pairs.getKey())
+												+ condition.getWeight());
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		DataUtil.printGoTermConditionWeights(goTermWeightPerCondition);
+
 	}
 }

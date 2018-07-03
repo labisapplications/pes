@@ -57,8 +57,11 @@ public class DataUtil {
 	
 	public static List<Double> getProteinsStatisticTest(List<Protein> proteins) {
 		List<Double> statistics = new ArrayList<Double>();
-		for (Protein protein : proteins) {		
-			statistics.add(protein.getStatisticTest());			
+		for (Protein protein : proteins) {
+			if(protein.getStatisticTest() >= 0.00) {
+				System.out.println("getStatisticTest " + protein.getStatisticTest());
+				statistics.add(protein.getStatisticTest());	
+			}
 		}
 		return statistics;
 	}
@@ -92,5 +95,31 @@ public class DataUtil {
 				}
 			}
 		}	
+	}
+	
+	public static void printGoTermConditionWeights(HashMap<String, HashMap<String, Double>> goTermWeightPerCondition) {
+		
+		Iterator itConditionMap = goTermWeightPerCondition.entrySet().iterator();
+
+		while (itConditionMap.hasNext()) {
+
+			Map.Entry pairs = (Map.Entry) itConditionMap.next();
+			
+			HashMap<String, Double> goMap = (HashMap<String, Double>) pairs.getValue();
+			
+			Iterator itGoMap = goMap.entrySet().iterator();
+			
+			System.out.println("CONDITION =>" + pairs.getKey() );
+			
+			while (itGoMap.hasNext()) {
+				
+				Map.Entry pairs2 = (Map.Entry) itGoMap.next();
+			
+				Double weight = (Double) pairs2.getValue();
+				
+				System.out.println("---GO_ID:" + pairs2.getKey() + " - WEIGHT: " + weight );
+
+			}
+		}
 	}
 }
