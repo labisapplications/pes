@@ -3,11 +3,8 @@ package br.com.usp.labis.useful;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.poi.ss.formula.functions.T;
 
 import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.Protein;
