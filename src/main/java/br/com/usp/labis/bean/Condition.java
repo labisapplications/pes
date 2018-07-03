@@ -9,6 +9,10 @@ public class Condition {
 
 	private String name;
 	private List<Replicate> replicates;
+	private Double mean;
+	private Double cv; //Coeficient of Variation 
+	private Double weight;
+
 
 	public String getName() {
 		return name;
@@ -24,6 +28,30 @@ public class Condition {
 
 	public void setReplicates(List<Replicate> replicates) {
 		this.replicates = replicates;
+	}
+
+	public Double getMean() {
+		return mean;
+	}
+
+	public void setMean(Double mean) {
+		this.mean = mean;
+	}
+
+	public Double getCv() {
+		return cv;
+	}
+
+	public void setCv(Double cv) {
+		this.cv = cv;
+	}
+
+	public Double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(Double weight) {
+		this.weight = weight;
 	}
 
 	@Override

@@ -2,17 +2,18 @@ package br.com.usp.labis.bean;
 
 import java.util.List;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoSearchResult {
+public class GoSearchGoAntologyResult  {
 
 	@JsonProperty
 	Integer numberOfHits;
 
 	@JsonProperty
-	List<Object> results;
+	List<GoAntology> results;
 
 	public Integer getNumberOfHits() {
 		return numberOfHits;
@@ -22,11 +23,11 @@ public class GoSearchResult {
 		this.numberOfHits = numberOfHits;
 	}
 
-	public List<Object> getResults() {
+	public List<GoAntology> getResults() {
 		return results;
 	}
 
-	public void setResults(List<Object> results) {
+	public void setResults(List<GoAntology> results) {
 		this.results = results;
 	}
 
@@ -47,7 +48,7 @@ public class GoSearchResult {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GoSearchResult other = (GoSearchResult) obj;
+		GoSearchGoAntologyResult other = (GoSearchGoAntologyResult) obj;
 		if (numberOfHits == null) {
 			if (other.numberOfHits != null)
 				return false;

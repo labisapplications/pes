@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.usp.labis.bean.GoAnnotation;
-import br.com.usp.labis.bean.GoSearchResult;
+import br.com.usp.labis.bean.GoSearchAnnotationResult;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.useful.GoAnnotationFilter;
 
@@ -29,11 +29,12 @@ public class GoAnnotationService {
 						.queryParam("geneProductId", protein.getProteinId()) // Add query params
 						.queryParam("taxonId", filters.getTaxonId()).build().encode().toUri();
 
-				GoSearchResult goSearchResult = restTemplate.getForObject(targetUrl, GoSearchResult.class);
-				List<GoAnnotation> annotations = (List<GoAnnotation>) (Object) goSearchResult.getResults();
+				GoSearchAnnotationResult goSearchResult = restTemplate.getForObject(targetUrl, GoSearchAnnotationResult.class);
+				List<GoAnnotation> annotations = goSearchResult.getResults();
 				protein.setGoAnnotations(annotations);
 
 				System.out.println("ANNOTATIONS SIZE =>>>> " + annotations.size());
+								
 			}
 
 		} catch (RuntimeException e) {

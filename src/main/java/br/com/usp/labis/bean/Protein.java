@@ -1,6 +1,8 @@
 package br.com.usp.labis.bean;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -8,15 +10,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Protein {
 
 	private String proteinId;
+	
 	private Float anovaSignificant;
+	
 	private Float ttestSignificant;
-	private Float anovaPvalue;
-	private Float ttestPvalue;
+	
+	private Double statisticTest;
+	
 	private String geneName;
+	
 	private List<Condition> conditions;
+	
 	private List<GoAnnotation> goAnnotations;
+	
 	private Integer taxonId;
-
+	
 	public String getProteinId() {
 		return proteinId;
 	}
@@ -40,21 +48,13 @@ public class Protein {
 	public void setTtestSignificant(Float ttestSignificant) {
 		this.ttestSignificant = ttestSignificant;
 	}
-
-	public Float getAnovaPvalue() {
-		return anovaPvalue;
+	
+	public Double getStatisticTest() {
+		return statisticTest;
 	}
 
-	public void setAnovaPvalue(Float anovaPvalue) {
-		this.anovaPvalue = anovaPvalue;
-	}
-
-	public Float getTtestPvalue() {
-		return ttestPvalue;
-	}
-
-	public void setTtestPvalue(Float ttestPvalue) {
-		this.ttestPvalue = ttestPvalue;
+	public void setStatisticTest(Double statisticTest) {
+		this.statisticTest = statisticTest;
 	}
 
 	public List<Condition> getConditions() {

@@ -1,10 +1,12 @@
 package br.com.usp.labis.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum GoAspectEnum {
 
-	BIOLOGICAL_PROCESS("biological process"), 
-	MOLECULAR_FUNCTION("molecular function"), 
-	CELULAR_COMPONENT("cellular component") ;
+	BIOLOGICAL_PROCESS("biological_process"),
+	MOLECULAR_FUNCTION("molecular_function"), 
+	CELULAR_COMPONENT("cellular_component");
 
 	private String aspect;
 
@@ -12,6 +14,7 @@ public enum GoAspectEnum {
 		this.aspect = aspect;
 	}
 
+	@JsonValue
 	public String getAspect() {
 		return aspect;
 	}

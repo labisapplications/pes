@@ -1,33 +1,62 @@
 package br.com.usp.labis.bean;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.usp.labis.enums.GoAspectEnum;
 import br.com.usp.labis.enums.GoEvidenceEnum;
-import br.com.usp.labis.enums.QualifierEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class GoAnnotation {
-
-	String annotationId;
+	
+	@JsonProperty
+	String id;
+	
+	@JsonProperty
 	String geneProductId;
-	QualifierEnum qualifier;
+	
+	@JsonProperty
+	String qualifier;
+	
+	@JsonProperty
 	GoAspectEnum goAspect;
+	
+	@JsonProperty
 	GoEvidenceEnum goEvidence;
+	
+	@JsonProperty
 	String goId;
+	
+	@JsonProperty
 	String goName;
+	
+	@JsonProperty
 	Integer taxonId;
+	
+	@JsonProperty
 	String symbol;
-	String name;
-	Extension extensions;
-	WithFrom withFrom;
+	
+	@JsonProperty
+	List<Extension> extensions;
+	
+	@JsonProperty
+	List<WithFrom> withFrom;
+	
+	@JsonIgnore
+	List<GoAntology> goAntology;
 
-	public String getAnnotationId() {
-		return annotationId;
+	public String getId() {
+		return id;
 	}
 
-	public void setAnnotationId(String annotationId) {
-		this.annotationId = annotationId;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getGeneProductId() {
@@ -38,11 +67,11 @@ public class GoAnnotation {
 		this.geneProductId = geneProductId;
 	}
 
-	public QualifierEnum getQualifier() {
+	public String getQualifier() {
 		return qualifier;
 	}
 
-	public void setQualifier(QualifierEnum qualifier) {
+	public void setQualifier(String qualifier) {
 		this.qualifier = qualifier;
 	}
 
@@ -94,35 +123,35 @@ public class GoAnnotation {
 		this.symbol = symbol;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Extension getExtensions() {
+	public List<Extension> getExtensions() {
 		return extensions;
 	}
 
-	public void setExtensions(Extension extensions) {
+	public void setExtensions(List<Extension> extensions) {
 		this.extensions = extensions;
 	}
 
-	public WithFrom getWithFrom() {
+	public List<WithFrom> getWithFrom() {
 		return withFrom;
 	}
 
-	public void setWithFrom(WithFrom withFrom) {
+	public void setWithFrom(List<WithFrom> withFrom) {
 		this.withFrom = withFrom;
+	}
+
+	public List<GoAntology> getGoAntology() {
+		return goAntology;
+	}
+
+	public void setGoAntology(List<GoAntology> goAntology) {
+		this.goAntology = goAntology;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((goId == null) ? 0 : goId.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -135,12 +164,14 @@ public class GoAnnotation {
 		if (getClass() != obj.getClass())
 			return false;
 		GoAnnotation other = (GoAnnotation) obj;
-		if (goId == null) {
-			if (other.goId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!goId.equals(other.goId))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
+
+	
 
 }
