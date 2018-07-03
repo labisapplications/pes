@@ -1,6 +1,9 @@
 package br.com.usp.labis.service;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -46,19 +49,20 @@ public class EnrichmentAnalysisService {
 
 	@Autowired
 	private GoAntologyService goAntologyService;
-	
+
 	private Map<String, List<Double>> conditionsMean;
-	
+
 	private Map<String, List<Double>> conditionsCv;
-	
+
 	private List<Double> statisticsTest;
-	
+
 	private Map<String, Double> maxMean;
-	
+
 	private Map<String, Double> maxCv;
-	
+
 	private Double maxStatisticTest;
 
+	private Map<String, List<Protein>> gotermWithProteins; // GO_ID : proteins related
 
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
@@ -68,7 +72,7 @@ public class EnrichmentAnalysisService {
 	 *            file with data to be analysed
 	 */
 	public void processEnrichmentAnalysis(MultipartFile file) {
-		
+
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
 
@@ -84,17 +88,23 @@ public class EnrichmentAnalysisService {
 		if (proteins != null && !proteins.isEmpty()) {
 
 			// get test t or anova for conditions
-			this.getStatisticsForProteins(proteins);
+			this.getStatistics(proteins);
 
 			// get annotations for each protein
-			//this.getAnnotationsForProteins(proteins, filters);
+			this.getAnnotationsForProteins(proteins, filters);
+			
+			//associate each go id to the proteins in the data file
+			this.mapGoTermsAndProteins(proteins);
+			
+			//calculate weigth for each goterm and filter go terms according to the filters
 
+			
 			// get antology for each annotation
-			 //this.getGoAntologyForAnnotations(proteins);
+			// this.getGoAntologyForAnnotations(proteins);
 		}
 	}
-	
-	private void getStatisticsForProteins(List<Protein> proteins) {
+
+	private void getStatistics(List<Protein> proteins) {
 		for (Protein protein : proteins) {
 			System.out.println("-------------------begin------------------");
 			System.out.println("-PROTEIN => " + protein.getProteinId());
@@ -113,21 +123,21 @@ public class EnrichmentAnalysisService {
 			} else {
 				protein.setStatisticTest(statisticService.tTest(protein.getConditions()));
 			}
-			
-			//calculate mean and cv for each protein condition
+
+			// calculate mean and cv for each protein condition
 			statisticService.calculateProteinConditionMeanAndCv(protein);
-			
+
 			System.out.println("-------------------end--------------------");
 		}
-		
+
 		conditionsCv = DataUtil.getConditionCvs(proteins);
 		conditionsMean = DataUtil.getConditionMeans(proteins);
 		statisticsTest = DataUtil.getProteinsStatisticTest(proteins);
-		
+
 		maxMean = statisticService.getMaxMean(conditionsMean);
 		maxCv = statisticService.getMaxCv(conditionsCv);
 		maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest);
-		
+
 		statisticService.calculateProteinWeightForEachCondition(proteins, maxMean, maxCv, maxStatisticTest);
 	}
 
@@ -146,9 +156,33 @@ public class EnrichmentAnalysisService {
 				System.out.println("go id for protein => " + protein.getGoAnnotations().get(0).getGoId());
 			}
 		}
-
 		System.out.println("The search for annotations is ended!!!");
+	}
 
+	private void mapGoTermsAndProteins(List<Protein> proteins) {
+		gotermWithProteins = new HashMap<String, List<Protein>> ();
+		for (Protein protein : proteins) {
+			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
+				for(GoAnnotation annotation :  protein.getGoAnnotations()) {
+					if (gotermWithProteins.get(annotation.getGoId()) == null) {
+						gotermWithProteins.put(annotation.getGoId(), new ArrayList<Protein>());
+					}
+					if(!gotermWithProteins.get(annotation.getGoId()).contains(protein)) {
+						gotermWithProteins.get(annotation.getGoId()).add(protein);
+					}
+				}
+			}
+		}
+		
+		Iterator it = gotermWithProteins.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pairs = (Map.Entry) it.next();
+			List<Protein> proteinsGoTerm = (List<Protein>) pairs.getValue();
+			for(Protein protein :  proteinsGoTerm) {
+				System.out.println(pairs.getKey() + " = " +protein.getProteinId());
+			}
+
+		}
 	}
 
 	private void getGoAntologyForAnnotations(List<Protein> proteins) {
