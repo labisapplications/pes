@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import br.com.usp.labis.bean.Condition;
@@ -41,6 +42,18 @@ public class DataUtil {
 		for(int i = 0; i < values.size(); i++) {
 			array[i] = values.get(i);
 		};
+		return array;
+	}
+	
+	public static String[] getProteinIdArray(List<Protein> values) {
+		String[] array = new String [values.size()];
+		Iterator it = values.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			Protein protein = (Protein) it.next();
+			array[i] = protein.getProteinId() ;
+			i++;
+		}
 		return array;
 	}
 
@@ -113,6 +126,34 @@ public class DataUtil {
 		List<Protein> filteredList = proteins.stream().filter(i -> i.getProteinId() != null && 
 				i.getProteinId() != "" && !i.getProteinId().equalsIgnoreCase(PROTEIN_IDS)).collect(Collectors.toList());
 		return filteredList;
+	}
+	
+	public static String[] shuffleProteins(String[] array) {
+	    int n = array.length;
+	    for (int i = 0; i < array.length; i++) {
+	        // Get a random index of the array past i.
+	        int random = i + (int) (Math.random() * (n - i));
+	        // Swap the random element with the present element.
+	        String randomElement = array[random];
+	        array[random] = array[i];
+	        array[i] = randomElement;
+	    }
+	    return array;
+	}
+	
+	public static List<Protein> getRandomlySelectedProteins(Integer quantity, List<Protein> proteins) {
+		List<Protein> proteinsRandomlySelected = new ArrayList<Protein>();
+		String[] proteinsId = DataUtil.getProteinIdArray(proteins);
+		proteinsId = DataUtil.shuffleProteins(proteinsId);
+		for (int i = 0; i < quantity; i++) {
+			for (Protein prot : proteins) {
+				if (prot.getProteinId().equalsIgnoreCase(proteinsId[i])) {
+					proteinsRandomlySelected.add(prot);
+					break;
+				}
+			}
+		}
+		return proteinsRandomlySelected;
 	}
 	
 	public static void printGoTermConditionWeights(HashMap<String, HashMap<String, Double>> goTermWeightPerCondition) {

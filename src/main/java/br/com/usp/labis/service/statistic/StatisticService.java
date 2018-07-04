@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.inference.TestUtils;
@@ -292,50 +294,148 @@ public class StatisticService {
 	 * @param Map<String,
 	 *            HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition
 	 **/
-	public Map<String, HashMap<String, List<Double>>> getGoTermProteinsCvForEachCondition(Map<String, HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition) {
-		
-		Map<String, HashMap<String, List<Double>>> goTermProteinsCv = new HashMap<String, HashMap<String, List<Double>>>();
+	public Map<String, HashMap<String, Double>> getGoTermProteinsCvForEachCondition(
+			Map<String, HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition) {
+
+		// Map<String, HashMap<String, List<Double>>> goTermProteinsCv = new
+		// HashMap<String, HashMap<String, List<Double>>>();
+		Map<String, HashMap<String, Double>> goTermProteinsCv = new HashMap<String, HashMap<String, Double>>();
 
 		Iterator it = goTermProteinsMeanForEachCondition.entrySet().iterator();
 		while (it.hasNext()) {
-			
+
 			Map.Entry pairs = (Map.Entry) it.next();
 			String goTerm = (String) pairs.getKey();
-			HashMap<String, List<Double>> values = (HashMap<String, List<Double>>) pairs.getValue();
-			
-			Iterator it2 = values.entrySet().iterator();
-			
+			HashMap<String, List<Double>> conditionMeans = (HashMap<String, List<Double>>) pairs.getValue();
+
+			Iterator it2 = conditionMeans.entrySet().iterator();
+
 			while (it2.hasNext()) {
 
 				Map.Entry pairs2 = (Map.Entry) it2.next();
-				
-				String condition = (String) pairs2.getKey();
-				
-				List<Double> values2 = (List<Double>) pairs2.getValue();
 
-				double[] array = DataUtil.getArray(values2);
+				String condition = (String) pairs2.getKey();
+
+				List<Double> means = (List<Double>) pairs2.getValue();
+
+				double[] array = DataUtil.getArray(means);
 
 				double mean = DataUtil.getSumDoubleValues(array) / array.length;
 
 				double stdeviation = this.calculateStandardDeviation(array);
 
 				double cv = stdeviation / (mean + 0.0000000001);
-				
+
 				if (goTermProteinsCv.get(goTerm) == null) {
-					goTermProteinsCv.put(goTerm, new HashMap<String, List<Double>>());
+					goTermProteinsCv.put(goTerm, new HashMap<String, Double>());
 				}
-				if (goTermProteinsCv.get(goTerm).get(condition) == null) {
-					goTermProteinsCv.get(goTerm).put(condition, new ArrayList<Double>());
-				}
-				goTermProteinsCv.get(goTerm).get(condition).add(cv);
+				/*
+				 * if (goTermProteinsCv.get(goTerm).get(condition) == null) {
+				 * goTermProteinsCv.get(goTerm).put(condition, new ArrayList<Double>()); }
+				 */
+
+				goTermProteinsCv.get(goTerm).put(condition, cv);
 
 			}
 		}
 		return goTermProteinsCv;
 	}
-	
-	public void getNullDistributions(Integer numberOfNullDistributions) {
-		
+
+	public Map<String, Map<String, Map<String, Double>>> getNullDistributions(Integer numberOfNullDistributions,
+			Double toleranceFactor, List<Protein> proteins, Map<String, HashMap<String, Double>> goTermProteinsCv,
+			Map<String, List<Protein>> goTermWithProteinsFiltered) {
+
+		Map<String, Map<String, Map<String, Double>>> goTermRandomProteinsWeight = new HashMap<String, Map<String, Map<String, Double>>>();
+		Iterator it = goTermProteinsCv.entrySet().iterator();
+
+		while (it.hasNext()) {
+
+			Map.Entry pairs = (Map.Entry) it.next();
+			String goTerm = (String) pairs.getKey();
+			HashMap<String, Double> conditionCv = (HashMap<String, Double>) pairs.getValue();
+			Iterator it2 = conditionCv.entrySet().iterator();
+
+			Integer goProteinsNumber = goTermWithProteinsFiltered.get(goTerm).size();
+
+			while (it2.hasNext()) {
+
+				Map.Entry pairs2 = (Map.Entry) it2.next();
+				String condition = (String) pairs2.getKey();
+				Double originalCv = (Double) pairs2.getValue();
+
+				goTermRandomProteinsWeight.put(goTerm, new HashMap<String, Map<String, Double>>());
+
+				// calc the null distributions
+				for (int nullDistribution = 0; nullDistribution < numberOfNullDistributions; nullDistribution++) {
+
+					// get randomly proteins and calc the cv. After, compare this cv to goTermCv
+					// previously calculated
+					List<Protein> proteinsRandomlySelected = DataUtil.getRandomlySelectedProteins(goProteinsNumber,
+							proteins);
+					Map<String, List<Protein>> randomGoTermProteins = new HashMap<String, List<Protein>>();
+					randomGoTermProteins.put(goTerm, proteinsRandomlySelected);
+					Map<String, HashMap<String, List<Double>>> randomGoTermProteinsMeans = this
+							.getGoTermProteinsMeanForEachCondition(randomGoTermProteins);
+					Map<String, HashMap<String, Double>> randomGoTermProteinsCv = getGoTermProteinsCvForEachCondition(
+							randomGoTermProteinsMeans);
+					Double proteinRandomCv = randomGoTermProteinsCv.get(goTerm).get(condition);
+
+					// calc the weight for random if the random cv calculate is between the range (1
+					// - toleranceFactor) * originalCv and (1 + toleranceFactor) * originalCv
+					if (proteinRandomCv >= (1 - toleranceFactor) * originalCv
+							&& proteinRandomCv <= (1 + toleranceFactor) * originalCv) {
+						Double weight = 0.00;
+						for (Protein protein : proteinsRandomlySelected) {
+							for (Condition cond : protein.getConditions()) {
+								if (cond.getName().equalsIgnoreCase(condition)) {
+									weight += cond.getWeight();
+								}
+							}
+						}
+
+						if (goTermRandomProteinsWeight.get(goTerm).get(condition) == null) {
+							goTermRandomProteinsWeight.get(goTerm).put(condition, new HashMap<String, Double>());
+						}
+						goTermRandomProteinsWeight.get(goTerm).get(condition).put(nullDistribution + "", weight);
+					}
+
+				}
+			}
+		}
+		return goTermRandomProteinsWeight;
+	}
+
+	public static void getCoreProteins(Map<String, HashMap<String, Double>> goTermProteinsCv,
+			HashMap<String, HashMap<String, Double>> goTermWeightPerCondition, Double pvalue) {
+
+		Iterator it = goTermProteinsCv.entrySet().iterator();
+
+		while (it.hasNext()) {
+
+			Map.Entry pairs = (Map.Entry) it.next();
+			String goTerm = (String) pairs.getKey();
+			Map<String, Map<String, Double>> conditionNullDistributions = (Map<String, Map<String, Double>>) pairs
+					.getValue();
+
+			Iterator it2 = conditionNullDistributions.entrySet().iterator();
+
+			while (it2.hasNext()) {
+
+				Map.Entry pairs2 = (Map.Entry) it2.next();
+				String condition = (String) pairs2.getKey();
+				Map<String, Double> nullDistributionWeights = (Map<String, Double>) pairs.getValue();
+				List<Double> weights = (List<Double>) nullDistributionWeights.values();
+				Double numberOfDistributions = (double) nullDistributionWeights.keySet().size();
+				Double originalWeight = goTermWeightPerCondition.get(goTerm).get(condition);
+				List<Double> filteredWeight = weights.stream().filter(i -> i > originalWeight)
+						.collect(Collectors.toList());
+				Double pvalueCalculated = filteredWeight.size() / numberOfDistributions;
+				if (pvalueCalculated <= pvalue) {
+					// get the core proteins for the go term
+				}
+			}
+
+		}
 	}
 
 }

@@ -69,19 +69,21 @@ public class EnrichmentAnalysisService {
 	
 	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ; //GO_ID : Condition: Weight
 	
-	Map<String,  HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition; //GO_ID : Condition : Means
+	private Map<String,  HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition; //GO_ID : Condition : Means
 	
-	Map<String, HashMap<String, List<Double>>> goTermProteinsCv;  //GO_ID : Condition : CVs
+	private Map<String, HashMap<String, Double>> goTermProteinsCv;  //GO_ID : Condition : CVs
+	
+	private Map<String, Map<String, Map<String, Double>>> goTermRandomProteinsWeight; //GO_ID : Condition: NullDistribution : Weight
 	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
-	 * over expressed genes.
+	 * over expressed genes and most relevant go annotations related
 	 * 
 	 * @param file
 	 *            file with data to be analysed
 	 */
-	public void processEnrichmentAnalysis(MultipartFile file, Integer minProteinsPerGoTerm, 
-			Double toleranceFactor, Integer numberOfDistributions) {
+	public void processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm, 
+			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
 
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
@@ -93,7 +95,7 @@ public class EnrichmentAnalysisService {
 		uploadFileService.removeUploadedFile(uploadedFile);
 
 		GoAnnotationFilter filters = new GoAnnotationFilter();
-		filters.setTaxonId(9606);
+		filters.setTaxonId(taxonId);
 
 		if (proteins != null && !proteins.isEmpty()) {
 			
@@ -120,10 +122,16 @@ public class EnrichmentAnalysisService {
 			goTermProteinsCv = statisticService.getGoTermProteinsCvForEachCondition(goTermProteinsMeanForEachCondition);
 			
 			//calculate the null distributions for randomly selected proteins 
+			goTermRandomProteinsWeight = statisticService.getNullDistributions(numberOfNullDistributions, toleranceFactor,  proteins,
+					goTermProteinsCv, goTermWithProteinsFiltered);
 			
-			//get the core proteins for the go term
+			/*get the number of null distribution are higher than pvalue for each condition and
+			 *  after that, get the core proteins for each go term*/
+			//statisticService.getCoreProteins(goTermProteinsCv, goTermWeightPerCondition,  pvalue);
 			
-			//export to excel
+			System.out.println("Process is finished");
+			
+			//create output file
 			
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);
