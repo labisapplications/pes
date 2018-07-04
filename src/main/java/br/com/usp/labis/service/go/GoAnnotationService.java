@@ -19,7 +19,6 @@ public class GoAnnotationService {
 
 	public Protein getGoAnnotationsForProteinAndTaxon(Protein protein, GoAnnotationFilter filters) {
 		System.out.println("ANNOTATION FOR protein =>>>> " + protein.getProteinId());
-		System.out.println("ANNOTATION FOR taxon =>>>> " + filters.getTaxonId());
 
 		try {
 				RestTemplate restTemplate = new RestTemplate();
@@ -30,8 +29,6 @@ public class GoAnnotationService {
 				GoSearchAnnotationResult goSearchResult = restTemplate.getForObject(targetUrl, GoSearchAnnotationResult.class);
 				List<GoAnnotation> annotations = goSearchResult.getResults();
 				protein.setGoAnnotations(annotations);
-
-			//	System.out.println("ANNOTATIONS SIZE =>>>> " + annotations.size());
 								
 		} catch (RuntimeException e) {
 			e.printStackTrace();

@@ -42,12 +42,12 @@ public class GoAnnotation {
 	@JsonProperty
 	String symbol;
 	
-	@JsonProperty
+	/*@JsonProperty
 	List<Extension> extensions;
 	
 	@JsonProperty
 	List<WithFrom> withFrom;
-	
+	*/
 	@JsonIgnore
 	List<GoAntology> goAntology;
 
@@ -123,6 +123,7 @@ public class GoAnnotation {
 		this.symbol = symbol;
 	}
 
+	/*
 	public List<Extension> getExtensions() {
 		return extensions;
 	}
@@ -137,7 +138,7 @@ public class GoAnnotation {
 
 	public void setWithFrom(List<WithFrom> withFrom) {
 		this.withFrom = withFrom;
-	}
+	}*/
 
 	public List<GoAntology> getGoAntology() {
 		return goAntology;

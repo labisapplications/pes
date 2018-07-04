@@ -119,7 +119,7 @@ public class EnrichmentAnalysisService {
 			//calculate the coefficient of variation for goTermProteinsMeanForEachCondition
 			goTermProteinsCv = statisticService.getGoTermProteinsCvForEachCondition(goTermProteinsMeanForEachCondition);
 			
-			//calculate the null distributions of randomly selected protein 
+			//calculate the null distributions for randomly selected proteins 
 			
 			//get the core proteins for the go term
 			
