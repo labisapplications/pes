@@ -35,6 +35,14 @@ public class DataUtil {
 		}
 		return sum;
 	}
+	
+	public static double[] getArray(List<Double> values) {
+		double[] array = new double[values.size()];
+		for(int i = 0; i < values.size(); i++) {
+			array[i] = values.get(i);
+		};
+		return array;
+	}
 
 	public static Double getMaxValueFromList(List<Double> list) {
 		Double max = 0.00;

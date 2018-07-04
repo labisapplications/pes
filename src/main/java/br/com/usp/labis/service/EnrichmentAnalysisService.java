@@ -69,6 +69,9 @@ public class EnrichmentAnalysisService {
 	
 	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ;
 	
+	Map<String,  HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition;
+	
+	Map<String, HashMap<String, List<Double>>> goTermProteinsCv;
 	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
@@ -77,7 +80,8 @@ public class EnrichmentAnalysisService {
 	 * @param file
 	 *            file with data to be analysed
 	 */
-	public void processEnrichmentAnalysis(MultipartFile file, Integer minProteinsPerGoTerm) {
+	public void processEnrichmentAnalysis(MultipartFile file, Integer minProteinsPerGoTerm, 
+			Double toleranceFactor, Integer numberOfDistributions) {
 
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
@@ -108,6 +112,16 @@ public class EnrichmentAnalysisService {
 			
 			//calculate weigth for each goterm and filter go terms according to the filters
 			statisticService.calculateGoTermWeight(goTermWithProteinsFiltered, proteins, goTermWeightPerCondition);
+			
+			//get protein means for each go term
+			goTermProteinsMeanForEachCondition = statisticService.getGoTermProteinsMeanForEachCondition(goTermWithProteinsFiltered);
+			
+			//calculate the coefficient of variation for goTermProteinsMeanForEachCondition
+			goTermProteinsCv = statisticService.getGoTermProteinsCvForEachCondition(goTermProteinsMeanForEachCondition);
+			
+			//calculate the null distributions of randomly selected protein 
+			
+			//get the core proteins for the go term
 			
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);

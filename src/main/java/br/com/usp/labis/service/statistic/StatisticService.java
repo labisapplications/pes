@@ -107,7 +107,7 @@ public class StatisticService {
 			double cv = stdeviation / (mean + 0.0000000001); // add 0.0000000001 so it will never go on zero division
 																// error
 			condition.setCv(cv);
-			
+
 			System.out.println("condition stdv " + stdeviation);
 			System.out.println("condition mean " + condition.getMean());
 			System.out.println("condition cv " + condition.getCv());
@@ -229,7 +229,7 @@ public class StatisticService {
 							if (goTermWeightPerCondition.get(condition.getName()) == null) {
 								goTermWeightPerCondition.put(condition.getName(), new HashMap<String, Double>());
 							}
-							
+
 							if (goTermWeightPerCondition.get(condition.getName())
 									.get((String) pairs.getKey()) == null) {
 								goTermWeightPerCondition.get(condition.getName()).put((String) pairs.getKey(),
@@ -244,8 +244,94 @@ public class StatisticService {
 				}
 			}
 		}
-		
+
 		DataUtil.printGoTermConditionWeights(goTermWeightPerCondition);
 		System.out.println("GoTerm weight was calculated");
 	}
+
+	/**
+	 * Get the for each go term the protein means in each condition
+	 * 
+	 * @param Map<String,
+	 *            List<Protein>> goTermWithProteinsFiltered
+	 **/
+	public Map<String, HashMap<String, List<Double>>> getGoTermProteinsMeanForEachCondition(
+			Map<String, List<Protein>> goTermWithProteinsFiltered) {
+
+		Map<String, HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition = new HashMap<String, HashMap<String, List<Double>>>();
+
+		Iterator it = goTermWithProteinsFiltered.entrySet().iterator();
+
+		while (it.hasNext()) {
+
+			Map.Entry pairs = (Map.Entry) it.next();
+			String goTerm = (String) pairs.getKey();
+			List<Protein> proteinsGoTerm = (List<Protein>) pairs.getValue();
+
+			for (int i = 0; i < proteinsGoTerm.size(); i++) {
+				List<Condition> conditions = proteinsGoTerm.get(i).getConditions();
+				for (Condition cond : conditions) {
+					if (goTermProteinsMeanForEachCondition.get(goTerm) == null) {
+						goTermProteinsMeanForEachCondition.put(goTerm, new HashMap<String, List<Double>>());
+					}
+					if (goTermProteinsMeanForEachCondition.get(goTerm).get(cond) == null) {
+						goTermProteinsMeanForEachCondition.get(goTerm).put(cond.getName(), new ArrayList<Double>());
+					}
+					goTermProteinsMeanForEachCondition.get(goTerm).get(cond.getName()).add(cond.getMean());
+				}
+			}
+
+		}
+		return goTermProteinsMeanForEachCondition;
+	}
+
+	/**
+	 * Calculate the protein coeficient of variation of proteins for each go term in
+	 * each condition
+	 * 
+	 * @param Map<String,
+	 *            HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition
+	 **/
+	public Map<String, HashMap<String, List<Double>>> getGoTermProteinsCvForEachCondition(Map<String, HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition) {
+		
+		Map<String, HashMap<String, List<Double>>> goTermProteinsCv = new HashMap<String, HashMap<String, List<Double>>>();
+
+		Iterator it = goTermProteinsMeanForEachCondition.entrySet().iterator();
+		while (it.hasNext()) {
+			
+			Map.Entry pairs = (Map.Entry) it.next();
+			String goTerm = (String) pairs.getKey();
+			HashMap<String, List<Double>> values = (HashMap<String, List<Double>>) pairs.getValue();
+			
+			Iterator it2 = values.entrySet().iterator();
+			
+			while (it2.hasNext()) {
+
+				Map.Entry pairs2 = (Map.Entry) it2.next();
+				
+				String condition = (String) pairs2.getKey();
+				
+				List<Double> values2 = (List<Double>) pairs2.getValue();
+
+				double[] array = DataUtil.getArray(values2);
+
+				double mean = DataUtil.getSumDoubleValues(array) / array.length;
+
+				double stdeviation = this.calculateStandardDeviation(array);
+
+				double cv = stdeviation / (mean + 0.0000000001);
+				
+				if (goTermProteinsCv.get(goTerm) == null) {
+					goTermProteinsCv.put(goTerm, new HashMap<String, List<Double>>());
+				}
+				if (goTermProteinsCv.get(goTerm).get(condition) == null) {
+					goTermProteinsCv.get(goTerm).put(condition, new ArrayList<Double>());
+				}
+				goTermProteinsCv.get(goTerm).get(condition).add(cv);
+
+			}
+		}
+		return goTermProteinsCv;
+	}
+
 }
