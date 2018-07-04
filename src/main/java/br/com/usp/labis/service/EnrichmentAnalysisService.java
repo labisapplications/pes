@@ -67,11 +67,11 @@ public class EnrichmentAnalysisService {
 	
 	private Map<String, List<Protein>> goTermWithProteinsFiltered; // GO_ID : proteins related after filters
 	
-	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ;
+	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ; //GO_ID : Condition: Weight
 	
-	Map<String,  HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition;
+	Map<String,  HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition; //GO_ID : Condition : Means
 	
-	Map<String, HashMap<String, List<Double>>> goTermProteinsCv;
+	Map<String, HashMap<String, List<Double>>> goTermProteinsCv;  //GO_ID : Condition : CVs
 	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
@@ -123,8 +123,12 @@ public class EnrichmentAnalysisService {
 			
 			//get the core proteins for the go term
 			
+			//export to excel
+			
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);
+			
+			//create the relationship matrix
 		}
 	}
 	

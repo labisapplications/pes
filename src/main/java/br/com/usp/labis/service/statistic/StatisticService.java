@@ -333,5 +333,9 @@ public class StatisticService {
 		}
 		return goTermProteinsCv;
 	}
+	
+	public void getNullDistributions(Integer numberOfNullDistributions) {
+		
+	}
 
 }
