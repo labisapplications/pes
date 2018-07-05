@@ -62,7 +62,7 @@ public class EnrichmentAnalysisService {
 	private Map<String, Double> maxCv;
 
 	private Double maxStatisticTest;
-
+	
 	private Map<String, List<Protein>> goTermWithProteins; // GO_ID : proteins related
 	
 	private Map<String, List<Protein>> goTermWithProteinsFiltered; // GO_ID : proteins related after filters
@@ -75,6 +75,22 @@ public class EnrichmentAnalysisService {
 	
 	private Map<String, Map<String, Map<String, Double>>> goTermRandomProteinsWeight; //GO_ID : Condition: NullDistribution : Weight
 	
+	
+	public void reset() {
+		goTermRandomProteinsWeight = null;
+		goTermProteinsCv = null;
+		goTermProteinsMeanForEachCondition = null;
+		goTermWeightPerCondition = null;
+		goTermWithProteinsFiltered = null;
+		goTermWithProteins = null;
+		maxStatisticTest = null;
+		maxCv = null;
+		maxMean = null;
+		statisticsTest = null;
+		conditionsCv = null;
+		conditionsMean = null;
+	}
+	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
 	 * over expressed genes and most relevant go annotations related
@@ -85,6 +101,8 @@ public class EnrichmentAnalysisService {
 	public void processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm, 
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
 
+		reset();
+		
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
 
@@ -110,16 +128,15 @@ public class EnrichmentAnalysisService {
 			//associate each go id to the proteins in the data file
 			this.mapGoTermsAndProteins(proteins);
 			
+			//filter go terms according to the filters
 			DataUtil.filterGoTermsAndProteins(goTermWithProteins, goTermWithProteinsFiltered, minProteinsPerGoTerm);
 			
-			//calculate weigth for each goterm and filter go terms according to the filters
-			statisticService.calculateGoTermWeight(goTermWithProteinsFiltered, proteins, goTermWeightPerCondition);
+			//calculate weigth, mean and cv for each goterm 
+			goTermProteinsMeanForEachCondition = new HashMap<String,  HashMap<String, List<Double>>> ();
+			goTermProteinsCv = new HashMap<String, HashMap<String, Double>>();
 			
-			//get protein means for each go term
-			goTermProteinsMeanForEachCondition = statisticService.getGoTermProteinsMeanForEachCondition(goTermWithProteinsFiltered);
-			
-			//calculate the coefficient of variation for goTermProteinsMeanForEachCondition
-			goTermProteinsCv = statisticService.getGoTermProteinsCvForEachCondition(goTermProteinsMeanForEachCondition);
+			goTermWeightPerCondition = statisticService.calculateGoTermWeight(goTermWithProteinsFiltered, proteins,  
+					goTermProteinsMeanForEachCondition, goTermProteinsCv);
 			
 			//calculate the null distributions for randomly selected proteins 
 			goTermRandomProteinsWeight = statisticService.getNullDistributions(numberOfNullDistributions, toleranceFactor,  proteins,
@@ -127,7 +144,8 @@ public class EnrichmentAnalysisService {
 			
 			/*get the number of null distribution are higher than pvalue for each condition and
 			 *  after that, get the core proteins for each go term*/
-			//statisticService.getCoreProteins(goTermProteinsCv, goTermWeightPerCondition,  pvalue);
+			statisticService.getCoreProteins(goTermProteinsCv, goTermWeightPerCondition,  goTermWithProteinsFiltered, goTermRandomProteinsWeight,
+					pvalue, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions, toleranceFactor);
 			
 			System.out.println("Process is finished");
 			
@@ -228,7 +246,7 @@ public class EnrichmentAnalysisService {
 	private void executeGoWorker(Protein protein, GoAnnotationFilter filters, List<GoAnnotation> annotations) {
 
 		// starting threads to speed up the search
-		ExecutorService executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(25);
+		ExecutorService executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
 		GoWorker worker = null;
 
 		if (annotations != null) {
