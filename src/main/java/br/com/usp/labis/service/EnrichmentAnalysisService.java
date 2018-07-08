@@ -51,46 +51,6 @@ public class EnrichmentAnalysisService {
 	@Autowired
 	private GoAntologyService goAntologyService;
 
-	private Map<String, List<Double>> conditionsMean;
-
-	private Map<String, List<Double>> conditionsCv;
-
-	private List<Double> statisticsTest;
-
-	private Map<String, Double> maxMean;
-
-	private Map<String, Double> maxCv;
-
-	private Double maxStatisticTest;
-	
-	private Map<String, List<Protein>> goTermWithProteins; // GO_ID : proteins related
-	
-	private Map<String, List<Protein>> goTermWithProteinsFiltered; // GO_ID : proteins related after filters
-	
-	private HashMap<String, HashMap<String, Double>> goTermWeightPerCondition ; //GO_ID : Condition: Weight
-	
-	private Map<String,  HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition; //GO_ID : Condition : Means
-	
-	private Map<String, HashMap<String, Double>> goTermProteinsCv;  //GO_ID : Condition : CVs
-	
-	private Map<String, Map<String, Map<String, Double>>> goTermRandomProteinsWeight; //GO_ID : Condition: NullDistribution : Weight
-	
-	
-	public void reset() {
-		goTermRandomProteinsWeight = null;
-		goTermProteinsCv = null;
-		goTermProteinsMeanForEachCondition = null;
-		goTermWeightPerCondition = null;
-		goTermWithProteinsFiltered = null;
-		goTermWithProteins = null;
-		maxStatisticTest = null;
-		maxCv = null;
-		maxMean = null;
-		statisticsTest = null;
-		conditionsCv = null;
-		conditionsMean = null;
-	}
-	
 	/**
 	 * Perform enrichment analysis for proteins in N conditions in order to find
 	 * over expressed genes and most relevant go annotations related
@@ -98,11 +58,48 @@ public class EnrichmentAnalysisService {
 	 * @param file
 	 *            file with data to be analysed
 	 */
-	public void processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm, 
+	public void processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
 
-		reset();
-		
+		// variables
+		List<Protein> proteinsWithoutAnnotation = new ArrayList<Protein>();
+
+		Map<String, List<Double>> conditionsMean = new HashMap<String, List<Double>>();
+
+		Map<String, List<Double>> conditionsCv = new HashMap<String, List<Double>>();
+
+		List<Double> statisticsTest = new ArrayList<Double>();
+
+		Map<String, Double> maxMean = new HashMap<String, Double>();
+
+		Map<String, Double> maxCv = new HashMap<String, Double>();
+
+		Double maxStatisticTest = null;
+
+		Map<String, List<Protein>> goTermWithProteins = new HashMap<String, List<Protein>>();
+		; // GO_ID : proteins related
+
+		Map<String, List<Protein>> goTermWithProteinsFiltered = new HashMap<String, List<Protein>>(); // GO_ID :
+																										// proteins
+																										// related after
+																										// filters
+
+		HashMap<String, HashMap<String, Double>> goTermWeightPerCondition = null; // GO_ID : Condition: Weight
+
+		Map<String, HashMap<String, List<Double>>> goTermProteinsMeanForEachCondition = new HashMap<String, HashMap<String, List<Double>>>(); // GO_ID
+																																				// :
+																																				// Condition
+																																				// :
+																																				// Means
+
+		Map<String, HashMap<String, Double>> goTermProteinsCv = new HashMap<String, HashMap<String, Double>>(); // GO_ID
+																												// :
+																												// Condition
+																												// : CVs
+
+		Map<String, Map<String, Map<String, Double>>> goTermRandomProteinsWeight = null; // GO_ID : Condition:
+																							// NullDistribution : Weight
+
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
 
@@ -112,56 +109,62 @@ public class EnrichmentAnalysisService {
 		// after process the data file, remove it from temporary directory
 		uploadFileService.removeUploadedFile(uploadedFile);
 
+		// filters to go annotations
 		GoAnnotationFilter filters = new GoAnnotationFilter();
 		filters.setTaxonId(taxonId);
 
 		if (proteins != null && !proteins.isEmpty()) {
-			
+
 			proteins = DataUtil.removeWhatIsNotProteinData(proteins);
-			
+
 			// get test t or anova for conditions, get max cv, mean and ttest
-			this.getStatistics(proteins);
+			maxStatisticTest = this.getStatistics(proteins, conditionsCv, conditionsMean, statisticsTest, maxMean,
+					maxCv);
 
 			// get annotations for each protein
-			this.getAnnotationsForProteins(proteins, filters);
-			
-			//associate each go id to the proteins in the data file
-			this.mapGoTermsAndProteins(proteins);
-			
-			//filter go terms according to the filters
+			this.getAnnotationsForProteins(proteins, filters, proteinsWithoutAnnotation);
+
+			// associate each go id to the proteins in the data file
+			this.mapGoTermsAndProteins(proteins, goTermWithProteins, goTermWithProteinsFiltered);
+
+			// filter go terms according to the filters
 			DataUtil.filterGoTermsAndProteins(goTermWithProteins, goTermWithProteinsFiltered, minProteinsPerGoTerm);
-			
-			//calculate weigth, mean and cv for each goterm 
-			goTermProteinsMeanForEachCondition = new HashMap<String,  HashMap<String, List<Double>>> ();
-			goTermProteinsCv = new HashMap<String, HashMap<String, Double>>();
-			
-			goTermWeightPerCondition = statisticService.calculateGoTermWeight(goTermWithProteinsFiltered, proteins,  
+
+			System.out.println("Calculating original go term weight");
+			goTermWeightPerCondition = statisticService.calculateGoTermWeight(goTermWithProteinsFiltered, proteins,
 					goTermProteinsMeanForEachCondition, goTermProteinsCv);
-			
-			//calculate the null distributions for randomly selected proteins 
-			goTermRandomProteinsWeight = statisticService.getNullDistributions(numberOfNullDistributions, toleranceFactor,  proteins,
-					goTermProteinsCv, goTermWithProteinsFiltered);
-			
-			/*get the number of null distribution are higher than pvalue for each condition and
-			 *  after that, get the core proteins for each go term*/
-			statisticService.getCoreProteins(goTermProteinsCv, goTermWeightPerCondition,  goTermWithProteinsFiltered, goTermRandomProteinsWeight,
-					pvalue, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions, toleranceFactor);
-			
-			System.out.println("Process is finished");
-			
-			//create output file
-			
+
+			System.out.println("Calculating the null distributions");
+			// calculate the null distributions for randomly selected proteins
+			goTermRandomProteinsWeight = statisticService.getNullDistributions(numberOfNullDistributions,
+					toleranceFactor, proteins, goTermProteinsCv, goTermWithProteinsFiltered);
+
+			/*
+			 * get the number of null distribution are higher than pvalue for each condition
+			 * and after that, get the core proteins for each go term
+			 */
+			System.out.println("Calculating the core proteins");
+			statisticService.getCoreProteins(goTermProteinsCv, goTermWeightPerCondition, goTermWithProteinsFiltered,
+					goTermRandomProteinsWeight, pvalue, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
+					toleranceFactor);
+
+			System.out.println("The analysis is finished");
+
+			// create output file
+
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);
-			
-			//create the relationship matrix
+
+			// create the relationship matrix
 		}
 	}
-	
-	private void getStatistics(List<Protein> proteins) {
-		
+
+	private Double getStatistics(List<Protein> proteins, Map<String, List<Double>> conditionsCv,
+			Map<String, List<Double>> conditionsMean, List<Double> statisticsTest, Map<String, Double> maxMean,
+			Map<String, Double> maxCv) {
+
 		for (Protein protein : proteins) {
-			
+
 			System.out.println("-------------------begin------------------");
 			System.out.println("-PROTEIN => " + protein.getProteinId());
 			System.out.println("-GENE => " + protein.getGeneNames());
@@ -186,43 +189,76 @@ public class EnrichmentAnalysisService {
 			System.out.println("-------------------end--------------------");
 		}
 
-		conditionsCv = DataUtil.getConditionCvs(proteins);
-		conditionsMean = DataUtil.getConditionMeans(proteins);
-		statisticsTest = DataUtil.getProteinsStatisticTest(proteins);
+		DataUtil.getConditionCvs(proteins, conditionsCv);
+		DataUtil.getConditionMeans(proteins, conditionsMean);
+		DataUtil.getProteinsStatisticTest(proteins, statisticsTest);
 
-		maxMean = statisticService.getMaxMean(conditionsMean);
-		maxCv = statisticService.getMaxCv(conditionsCv);
-		maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest);
+		statisticService.getMaxMean(conditionsMean, maxMean);
+		statisticService.getMaxCv(conditionsCv, maxCv);
+		Double maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest);
 
 		statisticService.calculateProteinWeightForEachCondition(proteins, maxMean, maxCv, maxStatisticTest);
+
+		return maxStatisticTest;
 	}
 
-	private void getAnnotationsForProteins(List<Protein> proteins, GoAnnotationFilter filters) {
+	private void getAnnotationsForProteins(List<Protein> proteins, GoAnnotationFilter filters, List<Protein> proteinsWithoutAnnotation) {
 
 		for (Protein protein : proteins) {
 			this.executeGoWorker(protein, filters, null);
 		}
 
+		// try again
 		for (Protein protein : proteins) {
 			// if some protein is without annotations try again
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
-				System.out.println("Protein: " + protein.getProteinId());
+				System.out.println("Trying to get annotation for protein again: " + protein.getProteinId());
 				this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
-			} 
+			}
+		}
+
+		// try a second protein id (if exists)
+		for (Protein protein : proteins) {
+			if ((protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty())
+					&& protein.getOtherProteinsIdAssociated() != null
+					&& !protein.getOtherProteinsIdAssociated().isEmpty()) {
+				for (String otherProteinId : protein.getOtherProteinsIdAssociated()) {
+
+					if (!protein.getProteinId().equalsIgnoreCase(otherProteinId)) {
+						protein.setProteinId(otherProteinId);
+						System.out.println(
+								"Protein id changed from " + protein.getProteinId() + " to  => " + otherProteinId);
+						System.out.println("Trying to get annotation for protein again => " + protein.getProteinId());
+						this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
+					}
+
+					if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
+						break;
+					}
+				}
+
+			}
+		}
+
+		// give up
+		for (Protein protein : proteins) {
+			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
+				System.out.println("Could not get annotation for => " + protein.getProteinId());
+				proteinsWithoutAnnotation.add(protein);
+			}
 		}
 		System.out.println("The search for annotations is ended!!!");
 	}
 
-	private void mapGoTermsAndProteins(List<Protein> proteins) {
-		goTermWithProteins = new HashMap<String, List<Protein>> ();
-		goTermWithProteinsFiltered = new HashMap<String, List<Protein>> ();
+	private void mapGoTermsAndProteins(List<Protein> proteins, Map<String, List<Protein>> goTermWithProteins,
+			Map<String, List<Protein>> goTermWithProteinsFiltered) {
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
-				for(GoAnnotation annotation :  protein.getGoAnnotations()) {
+				for (GoAnnotation annotation : protein.getGoAnnotations()) {
 					if (goTermWithProteins.get(annotation.getGoId()) == null) {
 						goTermWithProteins.put(annotation.getGoId(), new ArrayList<Protein>());
 					}
-					if(!goTermWithProteins.get(annotation.getGoId()).contains(protein)) {
+					if (!goTermWithProteins.get(annotation.getGoId()).contains(protein)) {
 						goTermWithProteins.get(annotation.getGoId()).add(protein);
 					}
 				}
@@ -232,8 +268,6 @@ public class EnrichmentAnalysisService {
 
 	}
 
-	
-	
 	private void getGoAntologyForAnnotations(List<Protein> proteins) {
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {

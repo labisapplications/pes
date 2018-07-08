@@ -106,11 +106,13 @@ public class ExcelReaderService {
 		}
 	}
 
-    /**
-     * Process row of the data file
-     * @param  currentRow
-     * @param List<Object> rows of the data file
-     */
+	/**
+	 * Process row of the data file
+	 * 
+	 * @param currentRow
+	 * @param List<Object>
+	 *            rows of the data file
+	 */
 	private void processRow(Row currentRow, Map<String, List<Object>> rows) {
 		Iterator<Cell> cellIterator = currentRow.iterator();
 		Integer columnNumber = 0;
@@ -154,26 +156,47 @@ public class ExcelReaderService {
 		Protein protein = new Protein();
 		protein.setConditions(new ArrayList<Condition>());
 		try {
-			//just considerer the first protein id in the list of protein'ids because it is probably the most significant
-			if(proteinNames != null) {
+			// just considerer the first protein id in the list of protein'ids because it is
+			// probably the most significant
+			// put the other proteins id in a separated array to be used if necessary
+			
+			if (proteinNames != null) {
 				String[] proteinIdsArray = proteinNames.split(";");
-				protein.setProteinId(proteinIdsArray[0]);			}
-		
+				
+				for(int i = 0; i < proteinIdsArray.length; i++) {
+					String proteinId = proteinIdsArray[i];
+					
+					//ignores '-' in the protein id (if it exists)
+					if(proteinId.lastIndexOf("-") != -1) {
+						proteinId = proteinId.substring(0, proteinId.lastIndexOf("-"));
+					}
+					
+					if(i == 0) {		
+						protein.setProteinId(proteinId);
+					} else {
+					
+						if(protein.getOtherProteinsIdAssociated() == null) {
+							protein.setOtherProteinsIdAssociated(new ArrayList<String>());
+						}	
+					
+						protein.getOtherProteinsIdAssociated().add(proteinId);
+					}
+				}
+			}
+
 		} catch (RuntimeException e) {
 			System.out.println("Error to get protein id" + proteinNames + " => gene is null");
 		}
 
-
-
-
 		try {
-			//just considerer the first gene in the list of genes because it is probably the most significant
+			// just considerer the first gene in the list of genes because it is probably
+			// the most significant
 			String geneNamesValue = (String) rowColumns.get(geneNames.get(GENE_NAMES).get(0));
-			if(geneNamesValue != null) {
+			if (geneNamesValue != null) {
 				String[] geneNamesValuesArray = geneNamesValue.split(";");
 				protein.setGeneNames(geneNamesValuesArray[0]);
 			}
-		
+
 		} catch (RuntimeException e) {
 			System.out.println("Error protein " + proteinNames + " => gene is null");
 		}
@@ -215,11 +238,14 @@ public class ExcelReaderService {
 		return protein;
 	}
 
-    /**
-     * Get position of column gene names in the data file
-     * @param Map<String, List<Object>> rows rows in the data file
-     * @param Map<String, List<Integer>> map with position for gene names
-     */	
+	/**
+	 * Get position of column gene names in the data file
+	 * 
+	 * @param Map<String,
+	 *            List<Object>> rows rows in the data file
+	 * @param Map<String,
+	 *            List<Integer>> map with position for gene names
+	 */
 	private Map<String, List<Integer>> getGeneNames(Map<String, List<Object>> rows) {
 		Map<String, List<Integer>> dataColumnPosition = new HashMap<String, List<Integer>>();
 		List<Object> columns = rows.get(PROTEIN_IDS);
@@ -241,11 +267,14 @@ public class ExcelReaderService {
 		return dataColumnPosition;
 	}
 
-	   /**
-     * Get positions of columns related to protein conditions in the data file
-     * @param Map<String, List<Object>> rows rows in the data file
-     * @param Map<String, List<Integer>> map with conditions and respectives replicates
-     */	
+	/**
+	 * Get positions of columns related to protein conditions in the data file
+	 * 
+	 * @param Map<String,
+	 *            List<Object>> rows rows in the data file
+	 * @param Map<String,
+	 *            List<Integer>> map with conditions and respectives replicates
+	 */
 	private Map<String, List<Integer>> getConditionsAndReplicates(Map<String, List<Object>> rows) {
 		Map<String, List<Integer>> dataColumnPosition = new HashMap<String, List<Integer>>();
 		List<Object> columns = rows.get(PROTEIN_IDS);

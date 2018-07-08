@@ -65,8 +65,7 @@ public class DataUtil {
 		return max;
 	}
 
-	public static Map<String, List<Double>> getConditionMeans(List<Protein> proteins) {
-		Map<String, List<Double>> conditionMeans = new HashMap<String, List<Double>>();
+	public static Map<String, List<Double>> getConditionMeans(List<Protein> proteins, 	Map<String, List<Double>> conditionMeans) {
 		for (Protein protein : proteins) {
 			for (Condition condition : protein.getConditions()) {
 
@@ -79,8 +78,7 @@ public class DataUtil {
 		return conditionMeans;
 	}
 	
-	public static List<Double> getProteinsStatisticTest(List<Protein> proteins) {
-		List<Double> statistics = new ArrayList<Double>();
+	public static List<Double> getProteinsStatisticTest(List<Protein> proteins, List<Double> statistics ) {
 		for (Protein protein : proteins) {
 			if(protein.getStatisticTest() >= 0.00) {
 				statistics.add(protein.getStatisticTest());	
@@ -89,8 +87,7 @@ public class DataUtil {
 		return statistics;
 	}
 	
-	public static Map<String, List<Double>> getConditionCvs(List<Protein> proteins) {
-		Map<String, List<Double>> conditionsCv = new HashMap<String, List<Double>>();
+	public static Map<String, List<Double>> getConditionCvs(List<Protein> proteins, Map<String, List<Double>> conditionsCv) {
 		for (Protein protein : proteins) {
 			for (Condition condition : protein.getConditions()) {
 
@@ -118,7 +115,7 @@ public class DataUtil {
 				}
 			}
 		}
-		System.out.println("Filters applied");
+		System.out.println("Filters go applied");
 
 	}
 	

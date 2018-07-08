@@ -11,6 +11,8 @@ public class Protein {
 
 	private String proteinId;
 	
+	private List<String> otherProteinsIdAssociated;
+	
 	private Float anovaSignificant;
 	
 	private Float ttestSignificant;
@@ -95,6 +97,14 @@ public class Protein {
 
 	public void setTaxonId(Integer taxonId) {
 		this.taxonId = taxonId;
+	}
+
+	public List<String> getOtherProteinsIdAssociated() {
+		return otherProteinsIdAssociated;
+	}
+
+	public void setOtherProteinsIdAssociated(List<String> otherProteinsIdAssociated) {
+		this.otherProteinsIdAssociated = otherProteinsIdAssociated;
 	}
 
 	@Override

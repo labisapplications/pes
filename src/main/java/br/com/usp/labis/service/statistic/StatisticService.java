@@ -123,8 +123,7 @@ public class StatisticService {
 	 * @param conditionMeans
 	 *            all condition means
 	 */
-	public Map<String, Double> getMaxMean(Map<String, List<Double>> conditionMeans) {
-		Map<String, Double> conditionMaxMean = new HashMap<String, Double>();
+	public Map<String, Double> getMaxMean(Map<String, List<Double>> conditionMeans, Map<String, Double> conditionMaxMean) {
 		Iterator itMean = conditionMeans.entrySet().iterator();
 		while (itMean.hasNext()) {
 			Map.Entry pairs = (Map.Entry) itMean.next();
@@ -143,8 +142,7 @@ public class StatisticService {
 	 * @param conditionCvs
 	 *            all condition cvs
 	 */
-	public Map<String, Double> getMaxCv(Map<String, List<Double>> conditionCvs) {
-		Map<String, Double> conditionMaxCv = new HashMap<String, Double>();
+	public Map<String, Double> getMaxCv(Map<String, List<Double>> conditionCvs, Map<String, Double> conditionMaxCv) {
 		Iterator itCv = conditionCvs.entrySet().iterator();
 		while (itCv.hasNext()) {
 			Map.Entry pairs = (Map.Entry) itCv.next();
