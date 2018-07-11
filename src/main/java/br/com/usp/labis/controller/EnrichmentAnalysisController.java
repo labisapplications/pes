@@ -32,8 +32,7 @@ public class EnrichmentAnalysisController {
 	public ResponseEntity<Resource> processEnrichmentAnalysis(@RequestParam("file") MultipartFile file,
 			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,
 			@RequestParam("toleranceFactor") Double toleranceFactor,
-			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue,
-			HttpServletResponse response) {
+			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
 		
 		String resultFilePath = enrichmentAnalysisService.processEnrichmentAnalysis(file, taxonId, minProteins, toleranceFactor,
 				nullDistributions, pvalue);
