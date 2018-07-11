@@ -19,7 +19,7 @@ import br.com.usp.labis.bean.Protein;
 public class OutputFileService {
 
 	//private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
-	private final String UPLOADED_FOLDER = "~/app-root/data/";
+	private final String UPLOADED_FOLDER = System.getenv("OPENSHIFT_DATA_DIR") ;
 	
 	private final String FILE_EXTENSION = ".XLS";
 

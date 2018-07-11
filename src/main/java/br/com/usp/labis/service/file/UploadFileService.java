@@ -2,9 +2,9 @@ package br.com.usp.labis.service.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +14,7 @@ public class UploadFileService {
 
 	// private final String UPLOADED_FOLDER = "C:" + File.separator +
 	// "uploaded_file" + File.separator;
-	private final String UPLOADED_FOLDER = "~/app-root/data/";
+	private final String UPLOADED_FOLDER = System.getenv("OPENSHIFT_DATA_DIR") ;
 
 	private final String FILE_EXTENSION = ".XLS";
 
@@ -34,10 +34,11 @@ public class UploadFileService {
 
 			// Get the file and save it in the UPLOADED_FOLDER
 			byte[] bytes = file.getBytes();
-			Path path = Paths.get(UPLOADED_FOLDER + newFileName);
+			//Path path = Paths.get(UPLOADED_FOLDER + newFileName);
+			Path path = FileSystems.getDefault().getPath(UPLOADED_FOLDER, newFileName);
 			Files.write(path, bytes);
 			uploadedFile = new File(UPLOADED_FOLDER + newFileName);
-
+			
 		} catch (IOException e) {
 			System.out.println("error " + e.getMessage() + e.getCause());
 			e.printStackTrace();
