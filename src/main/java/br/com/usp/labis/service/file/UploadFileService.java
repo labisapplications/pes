@@ -35,7 +35,9 @@ public class UploadFileService {
 			// Get the file and save it in the UPLOADED_FOLDER
 			byte[] bytes = file.getBytes();
 			//Path path = Paths.get(UPLOADED_FOLDER + newFileName);
-			Path path = FileSystems.getDefault().getPath(UPLOADED_FOLDER, newFileName);
+			System.out.println( "SOPENSHIFT_DATA_DIR" + System.getenv("OPENSHIFT_DATA_DIR") );
+			Path path = FileSystems.getDefault().getPath(System.getenv("OPENSHIFT_DATA_DIR"), newFileName);
+			System.out.println( "path" + path );
 			Files.write(path, bytes);
 			uploadedFile = new File(UPLOADED_FOLDER + newFileName);
 			
