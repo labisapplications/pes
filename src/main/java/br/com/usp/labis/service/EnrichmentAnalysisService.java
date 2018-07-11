@@ -22,6 +22,7 @@ import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 import br.com.usp.labis.service.file.ExcelReaderService;
+import br.com.usp.labis.service.file.OutputFileService;
 import br.com.usp.labis.service.file.UploadFileService;
 import br.com.usp.labis.service.go.GeneProductService;
 import br.com.usp.labis.service.go.GoAnnotationService;
@@ -36,6 +37,9 @@ public class EnrichmentAnalysisService {
 
 	@Autowired
 	private UploadFileService uploadFileService;
+	
+	@Autowired
+	private OutputFileService outputFileService;
 
 	@Autowired
 	private ExcelReaderService excelReaderService;
@@ -52,9 +56,11 @@ public class EnrichmentAnalysisService {
 	@Autowired
 	private GoAntologyService goAntologyService;
 
-	public void processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
+	public String processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
 
+		String resultFilePath = "";
+		
 		List<Protein> proteinsAnnotationNotFound = new ArrayList<Protein>();
 
 		Map<String, Double> maxMean = new HashMap<String, Double>();
@@ -149,12 +155,15 @@ public class EnrichmentAnalysisService {
 			}
 
 			// create output file
+			resultFilePath = outputFileService.exportToExcel(goTerms);
 
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);
 
 			// create the relationship matrix
 		}
+		
+		return resultFilePath;
 	}
 
 	private Double getStatistics(List<Protein> proteins, Map<String, Double> maxMean, Map<String, Double> maxCv) {

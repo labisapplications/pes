@@ -1,6 +1,17 @@
 package br.com.usp.labis.controller;
 
+import java.io.File;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,12 +28,23 @@ public class EnrichmentAnalysisController {
 	private EnrichmentAnalysisService enrichmentAnalysisService;
 
 	@PostMapping
-	public void processEnrichmentAnalysis(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<Resource> processEnrichmentAnalysis(@RequestParam("file") MultipartFile file,
 			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,
 			@RequestParam("toleranceFactor") Double toleranceFactor,
-			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
+			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue,
+			HttpServletResponse response) {
 		
-		enrichmentAnalysisService.processEnrichmentAnalysis(file, taxonId, minProteins, toleranceFactor,
+		String resultFilePath = enrichmentAnalysisService.processEnrichmentAnalysis(file, taxonId, minProteins, toleranceFactor,
 				nullDistributions, pvalue);
+        
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		
+		File fileOutput = new File(resultFilePath);
+		
+		FileSystemResource fileSystemResource = new FileSystemResource(fileOutput);
+		
+		return new ResponseEntity<>(fileSystemResource, headers, HttpStatus.OK);
+
 	}
 }
