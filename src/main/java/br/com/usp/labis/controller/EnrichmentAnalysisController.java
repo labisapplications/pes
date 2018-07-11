@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ public class EnrichmentAnalysisController {
 	@Autowired
 	private EnrichmentAnalysisService enrichmentAnalysisService;
 
+	@CrossOrigin
 	@PostMapping
 	public ResponseEntity<Resource> processEnrichmentAnalysis(@RequestParam("file") MultipartFile file,
 			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,

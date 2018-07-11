@@ -56,7 +56,7 @@
     		<artifactId>commons-math3</artifactId>
     		<version>3.0</version>
 		</dependency>
-     	<!--  
+     	
      	<dependency>
       		<groupId>org.springframework.boot</groupId>
       			<artifactId>spring-boot-starter-web</artifactId>
@@ -67,15 +67,17 @@
         			</exclusion>
      			 </exclusions>
     	</dependency>
-    	-->
+    	
     	<!-- We need to include the javax.servlet API specs, the implementation will be provided by Wildfly / JBoss-->
-    	<!--  
+    	  
     	<dependency>
      	 	<groupId>javax.servlet</groupId>
       		<artifactId>javax.servlet-api</artifactId>
       		<scope>provided</scope>
     	</dependency>
-       	-->
+       	
+       	
+       	<!--  
        	<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -85,7 +87,9 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		-->
 	</dependencies>
+	
 
 	<build>
 		<plugins>
