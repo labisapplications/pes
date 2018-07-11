@@ -3,9 +3,10 @@ package br.com.usp.labis.service.statistic;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
@@ -309,13 +310,19 @@ public class StatisticService {
 				if (goTermCondition.getPvalueOriginal() >= pvalue && goTermCondition.getOriginalProteins().size() > 1) {
 
 					List<Protein> originalProteins = goTermCondition.getOriginalProteins();
+
+					List<Protein> originalProteinsOrdered = DataUtil.orderProteinConditionWeightAsc(originalProteins,
+							goTermCondition.getCondition());
+
+					// first: consider that the final pvalue and final weight are like the original
+					// ones
 					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
 					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
 
-					for (Protein originaProt : originalProteins) {
+					for (Protein originaProt : originalProteinsOrdered) {
 
 						// get a list without the protein to see if pvalue will get better without it
-						List<Protein> core = originalProteins.stream()
+						List<Protein> core = originalProteinsOrdered.stream()
 								.filter(i -> i.getProteinId() != originaProt.getProteinId())
 								.collect(Collectors.toList());
 
@@ -350,15 +357,13 @@ public class StatisticService {
 						this.getNullDistributions(numberOfNullDistributions, toleranceFactor,
 								goTermToGetNullDistributions, goTermCondition.getCondition().getName(),
 								proteinsOriginal, true);
+						
+						pvalue = goTermCondition.getPvalueOriginal();
 
 						this.compareNullDistributionPvalues(goTermToGetNullDistributions, pvalue, true);
 
-						// goTerm = goTermToGetNullDistributions.get(0);
-
+						
 						if (goTermCondition.getPvalueCore() >= pvalue) {
-
-							// add the protein again to the list
-							core.add(originaProt);
 							goTermCondition.setCoreProteins(core);
 							break;
 						}
@@ -366,6 +371,11 @@ public class StatisticService {
 						pvalue = goTermCondition.getPvalueCore();
 						goTermCondition.setFinalPvalue(pvalue);
 						goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+						originalProteinsOrdered = core;
+						
+						if (originalProteinsOrdered.size() == 1) {
+							break;
+						}
 					}
 
 				} else {
@@ -396,15 +406,11 @@ public class StatisticService {
 							: goTermCondition.getCoreWeight();
 
 					for (NullDistribution nullDistribution : nullDistributions) {
-						System.out.println("---weightToCompare: " + weightToCompare);
-						System.out.println("weight: " + nullDistribution.getWeight());
 						if (nullDistribution.getWeight() > weightToCompare) {
 							filteredWeight.add(nullDistribution.getWeight());
 						}
 
 					}
-					System.out.println("---filteredWeight: " + filteredWeight.size());
-
 					Double pvalueCalculated = filteredWeight.size() / (numberOfDistributions + 0.000000001);
 
 					if (!isCore) {

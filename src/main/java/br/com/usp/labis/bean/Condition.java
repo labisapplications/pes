@@ -1,5 +1,6 @@
 package br.com.usp.labis.bean;
 
+import java.util.Comparator;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -84,5 +85,4 @@ public class Condition {
 			return false;
 		return true;
 	}
-
 }

@@ -157,7 +157,6 @@ public class GoTermCondition {
 	public void setFinalWeight(Double finalWeight) {
 		this.finalWeight = finalWeight;
 	}
-	
 
 	@Override
 	public int hashCode() {
@@ -279,5 +278,4 @@ public class GoTermCondition {
 			return false;
 		return true;
 	}
-
 }

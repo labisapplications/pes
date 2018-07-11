@@ -1,8 +1,6 @@
 package br.com.usp.labis.bean;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -137,6 +135,5 @@ public class Protein {
 			return false;
 		return true;
 	}
-
 
 }

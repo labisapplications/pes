@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import br.com.usp.labis.bean.Condition;
@@ -177,5 +179,28 @@ public class DataUtil {
 
 			}
 		}
+	}
+	
+	public static ArrayList<Protein> orderProteinConditionWeightAsc(List<Protein> originalProteins, Condition condition) {
+		Map<Protein, Double> proteinConditionWeight = new HashMap<Protein, Double>();
+
+		//get the proteins weight to the condition
+		for(Protein prot : originalProteins) {
+			for(Condition cond : prot.getConditions()) {
+				if(cond.getName().equalsIgnoreCase(condition.getName())) {
+					proteinConditionWeight.put(prot, cond.getWeight());
+
+				}
+			}
+		}
+		//get the proteins ordered asc by condition weight
+		Map<Protein, Double> proteinConditionWeightSorted = 
+				proteinConditionWeight.entrySet().stream()
+			    .sorted(Entry.comparingByValue())
+			    .collect(Collectors.toMap(Entry::getKey, Entry::getValue,
+			                              (e1, e2) -> e1, LinkedHashMap::new));
+		
+		return new ArrayList<>(proteinConditionWeightSorted.keySet());
+
 	}
 }

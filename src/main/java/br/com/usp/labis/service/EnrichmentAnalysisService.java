@@ -112,12 +112,28 @@ public class EnrichmentAnalysisService {
 			System.out.println("Getting null distribution pvalues");
 			// get the null distribution higher than pvalue for each condition
 			statisticService.compareNullDistributionPvalues(goTerms, pvalue, false);
+			
+			System.out.println("Before the Core analysis: ");
+			for (GoTerm goTerm : goTerms) {
+				for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  "
+							+ goTermCondition.getPvalueOriginal() + " - weight: " + goTermCondition.getOriginalWeight()
+							+ " - proteins: ";
+					StringBuilder prot = new StringBuilder();
+					for (Protein protein : goTermCondition.getOriginalProteins()) {
+						prot.append(protein.getProteinId());
+						prot.append(" ");
+					}
+					System.out.println(print + prot.toString());
+				}
+			}
 
 			// get the core proteins for each go term
 			System.out.println("Getting the core proteins");
 			statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
 					toleranceFactor, pvalue, proteins);
 
+			System.out.println("Getting the result: ");
 			for (GoTerm goTerm : goTerms) {
 				for (GoTermCondition goTermCondition : goTerm.getConditions()) {
 					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  "
