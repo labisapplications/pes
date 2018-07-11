@@ -14,7 +14,7 @@ public class UploadFileService {
 
 	// private final String UPLOADED_FOLDER = "C:" + File.separator +
 	// "uploaded_file" + File.separator;
-	private final String UPLOADED_FOLDER = File.separator + "uploaded_file" + File.separator;
+	private final String UPLOADED_FOLDER = System.getenv("OPENSHIFT_DATA_DIR") + File.separator;
 
 	private final String FILE_EXTENSION = ".XLS";
 
@@ -29,15 +29,6 @@ public class UploadFileService {
 
 		String newFileName = System.currentTimeMillis() + FILE_EXTENSION;
 		File uploadedFile = null;
-
-		try {
-			File theDir = new File(UPLOADED_FOLDER);
-			if (!theDir.exists()) {
-				theDir.mkdir();
-			}
-		} catch (RuntimeException e) {
-			System.out.println("Error to create dir " + e.getMessage() + e.getCause());
-		}
 
 		try {
 
