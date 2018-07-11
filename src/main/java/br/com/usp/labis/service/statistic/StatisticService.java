@@ -247,12 +247,8 @@ public class StatisticService {
 
 						Integer proteinsSize = 0;
 
-						try {
-							proteinsSize = !isCore ? goTermCondition.getOriginalProteins().size()
-									: goTermCondition.getCoreProteins().size();
-						} catch (RuntimeException e) {
-							System.out.println(" Erro =>" + e.getMessage());
-						}
+						proteinsSize = !isCore ? goTermCondition.getOriginalProteins().size()
+								: goTermCondition.getCoreProteins().size();
 
 						List<Protein> proteinsRandomlySelected = DataUtil.getRandomlySelectedProteins(proteinsSize,
 								proteins);
@@ -277,22 +273,18 @@ public class StatisticService {
 
 						// calc the weight for random if the random cv calculate is between the range (1
 						// - toleranceFactor) * originalCv and (1 + toleranceFactor) * originalCv
-						try {
-							if (nullDistribution.getCv() >= (1 - toleranceFactor) * cvToCompare
-									&& nullDistribution.getCv() <= (1 + toleranceFactor) * cvToCompare) {
-								Double weight = 0.00;
-								for (Double weightProtein : nullDistribution.getWeights()) {
-									weight += weightProtein;
-								}
-								nullDistribution.setWeight(weight);
-							} else {
-								nullDistribution.setWeight(0.00);
+						if (nullDistribution.getCv() >= (1 - toleranceFactor) * cvToCompare
+								&& nullDistribution.getCv() <= (1 + toleranceFactor) * cvToCompare) {
+							Double weight = 0.00;
+							for (Double weightProtein : nullDistribution.getWeights()) {
+								weight += weightProtein;
 							}
-
-							nullDistributions.add(nullDistribution);
-						} catch (RuntimeException e) {
-							System.out.println("Erro =>" + e.getMessage());
+							nullDistribution.setWeight(weight);
+						} else {
+							nullDistribution.setWeight(0.00);
 						}
+
+						nullDistributions.add(nullDistribution);
 					}
 
 					if (!isCore) {
@@ -347,23 +339,24 @@ public class StatisticService {
 						for (Double weight : weights) {
 							weightSum += weight;
 						}
-						
+
 						goTermCondition.setCoreCv(cv);
 						goTermCondition.setCoreWeight(weightSum);
 						goTermCondition.setCoreProteins(core);
-						
+
 						List<GoTerm> goTermToGetNullDistributions = new ArrayList<GoTerm>();
 						goTermToGetNullDistributions.add(goTerm);
-						
-						this.getNullDistributions(numberOfNullDistributions, toleranceFactor, goTermToGetNullDistributions,
-								goTermCondition.getCondition().getName(), proteinsOriginal, true);
+
+						this.getNullDistributions(numberOfNullDistributions, toleranceFactor,
+								goTermToGetNullDistributions, goTermCondition.getCondition().getName(),
+								proteinsOriginal, true);
 
 						this.compareNullDistributionPvalues(goTermToGetNullDistributions, pvalue, true);
-						
-						//goTerm = goTermToGetNullDistributions.get(0);
+
+						// goTerm = goTermToGetNullDistributions.get(0);
 
 						if (goTermCondition.getPvalueCore() >= pvalue) {
-							
+
 							// add the protein again to the list
 							core.add(originaProt);
 							goTermCondition.setCoreProteins(core);
@@ -411,7 +404,7 @@ public class StatisticService {
 						}
 					}
 
-					Double pvalueCalculated = filteredWeight.size() / numberOfDistributions;
+					Double pvalueCalculated = filteredWeight.size() / (numberOfDistributions + 0.000000001);
 
 					if (!isCore) {
 						goTermCondition.setPvalueOriginal(pvalueCalculated);
@@ -433,27 +426,24 @@ public class StatisticService {
 			Map<String, Condition> conditions = new HashMap<String, Condition>();
 
 			for (Protein proteinGoTerm : goTerm.getProteins()) {
-				for (Protein protein : proteins) {
-					if (protein.getProteinId().equalsIgnoreCase(proteinGoTerm.getProteinId())) {
-						for (Condition condition : protein.getConditions()) {
 
-							if (conditionSelected == null || conditionSelected.equalsIgnoreCase(condition.getName())) {
+				for (Condition condition : proteinGoTerm.getConditions()) {
 
-								// weights
-								if (weightsMap.get(condition.getName()) == null) {
-									weightsMap.put(condition.getName(), new ArrayList<Double>());
-									conditions.put(condition.getName(), condition);
-								}
-								weightsMap.get(condition.getName()).add(condition.getWeight());
+					if (conditionSelected == null || conditionSelected.equalsIgnoreCase(condition.getName())) {
 
-								// means
-								if (meansMap.get(condition.getName()) == null) {
-									meansMap.put(condition.getName(), new ArrayList<Double>());
-								}
-								meansMap.get(condition.getName()).add(condition.getMean());
-
-							}
+						// weights
+						if (weightsMap.get(condition.getName()) == null) {
+							weightsMap.put(condition.getName(), new ArrayList<Double>());
+							conditions.put(condition.getName(), condition);
 						}
+						weightsMap.get(condition.getName()).add(condition.getWeight());
+
+						// means
+						if (meansMap.get(condition.getName()) == null) {
+							meansMap.put(condition.getName(), new ArrayList<Double>());
+						}
+						meansMap.get(condition.getName()).add(condition.getMean());
+
 					}
 				}
 			}
@@ -468,7 +458,7 @@ public class StatisticService {
 
 				Double sumWeight = 0.00;
 				for (Double weight : goTermCondition.getOriginalWeights()) {
-					sumWeight = +weight;
+					sumWeight += weight;
 				}
 				goTermCondition.setOriginalWeight(sumWeight);
 				goTermCondition.setOriginalMeans(meansMap.get(goTermCondition.getCondition().getName()));

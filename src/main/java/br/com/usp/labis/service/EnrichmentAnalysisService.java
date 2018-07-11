@@ -55,14 +55,7 @@ public class EnrichmentAnalysisService {
 	public void processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
 
-		// variables
-		List<Protein> proteinsWithoutAnnotation = new ArrayList<Protein>();
-
-		Map<String, List<Double>> conditionsMean = new HashMap<String, List<Double>>();
-
-		Map<String, List<Double>> conditionsCv = new HashMap<String, List<Double>>();
-
-		List<Double> statisticsTest = new ArrayList<Double>();
+		List<Protein> proteinsAnnotationNotFound = new ArrayList<Protein>();
 
 		Map<String, Double> maxMean = new HashMap<String, Double>();
 
@@ -88,47 +81,56 @@ public class EnrichmentAnalysisService {
 			proteins = DataUtil.removeWhatIsNotProteinData(proteins);
 
 			// get test t or anova for conditions, get max cv, mean and ttest
-			maxStatisticTest = this.getStatistics(proteins, conditionsCv, conditionsMean, statisticsTest, maxMean,
-					maxCv);
+			maxStatisticTest = this.getStatistics(proteins, maxMean, maxCv);
 
 			// get annotations for each protein
-			this.getAnnotationsForProteins(proteins, filters, proteinsWithoutAnnotation);
+			this.getAnnotationsForProteins(proteins, filters, proteinsAnnotationNotFound);
 
 			System.out.println("Mapping go terms and proteins");
 			// associate each go id to the proteins in the data file
 			List<GoTerm> goTerms = mapGoTermsAndProteins(proteins, minProteinsPerGoTerm);
-			
+
+			for (GoTerm goTerm : goTerms) {
+				String print = goTerm.getGoAnnotation().getGoId() + " - proteins: ";
+				StringBuilder prot = new StringBuilder();
+				for (Protein protein : goTerm.getProteins()) {
+					prot.append(protein.getProteinId());
+					prot.append(" ");
+				}
+				System.out.println(print + prot.toString());
+
+			}
+
 			System.out.println("Calculating original go term weight");
 			statisticService.calculateGoTermWeight(goTerms, proteins, null);
 
 			System.out.println("Calculating the null distributions");
 			// calculate the null distributions for randomly selected proteins
-			statisticService.getNullDistributions(numberOfNullDistributions,
-					toleranceFactor, goTerms, null, proteins, false);
+			statisticService.getNullDistributions(numberOfNullDistributions, toleranceFactor, goTerms, null, proteins,
+					false);
 
 			System.out.println("Getting null distribution pvalues");
 			// get the null distribution higher than pvalue for each condition
-			statisticService.compareNullDistributionPvalues(goTerms,  pvalue, false) ;
+			statisticService.compareNullDistributionPvalues(goTerms, pvalue, false);
 
 			// get the core proteins for each go term
 			System.out.println("Getting the core proteins");
-			statisticService.getCoreProteins(goTerms, maxMean, maxCv,
-					maxStatisticTest, numberOfNullDistributions, toleranceFactor, pvalue, proteins) ;
-			
-			for(GoTerm goTerm : goTerms) {
-				for(GoTermCondition goTermCondition : goTerm.getConditions()) {
-					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  " + goTermCondition.getFinalPvalue()
-					+ " - weight: " + goTermCondition.getFinalWeight() + " - proteins: ";
+			statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
+					toleranceFactor, pvalue, proteins);
+
+			for (GoTerm goTerm : goTerms) {
+				for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  "
+							+ goTermCondition.getFinalPvalue() + " - weight: " + goTermCondition.getFinalWeight()
+							+ " - proteins: ";
 					StringBuilder prot = new StringBuilder();
-				    for(Protein protein : goTermCondition.getCoreProteins()) {
-				    	prot.append(protein.getProteinId());
-				    	prot.append(" ");
-				    }
+					for (Protein protein : goTermCondition.getCoreProteins()) {
+						prot.append(protein.getProteinId());
+						prot.append(" ");
+					}
 					System.out.println(print + prot.toString());
 				}
 			}
-			
-			System.out.println("The analysis is finished");
 
 			// create output file
 
@@ -139,11 +141,13 @@ public class EnrichmentAnalysisService {
 		}
 	}
 
+	private Double getStatistics(List<Protein> proteins, Map<String, Double> maxMean, Map<String, Double> maxCv) {
 
+		Map<String, List<Double>> conditionsMean = new HashMap<String, List<Double>>();
 
-	private Double getStatistics(List<Protein> proteins, Map<String, List<Double>> conditionsCv,
-			Map<String, List<Double>> conditionsMean, List<Double> statisticsTest, Map<String, Double> maxMean,
-			Map<String, Double> maxCv) {
+		Map<String, List<Double>> conditionsCv = new HashMap<String, List<Double>>();
+
+		List<Double> statisticsTest = new ArrayList<Double>();
 
 		for (Protein protein : proteins) {
 
@@ -185,7 +189,7 @@ public class EnrichmentAnalysisService {
 	}
 
 	private void getAnnotationsForProteins(List<Protein> proteins, GoAnnotationFilter filters,
-			List<Protein> proteinsWithoutAnnotation) {
+			List<Protein> proteinsAnnotationNotFound) {
 
 		for (Protein protein : proteins) {
 			this.executeGoWorker(protein, filters, null);
@@ -227,16 +231,18 @@ public class EnrichmentAnalysisService {
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
 				System.out.println("Could not get annotation for => " + protein.getProteinId());
-				proteinsWithoutAnnotation.add(protein);
+				proteinsAnnotationNotFound.add(protein);
 			}
 		}
 		System.out.println("The search for annotations is ended!!!");
 	}
 
 	private List<GoTerm> mapGoTermsAndProteins(List<Protein> proteins, Integer minProteinsPerGoTerm) {
+
 		List<GoTerm> listGoTerms = new ArrayList<GoTerm>();
 		Map<String, List<Protein>> goTermWithProteins = new HashMap<String, List<Protein>>();
-		Map<String, GoAnnotation> goAnnotation = new  HashMap<String, GoAnnotation>();
+		Map<String, GoAnnotation> goAnnotation = new HashMap<String, GoAnnotation>();
+
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
 				for (GoAnnotation annotation : protein.getGoAnnotations()) {
