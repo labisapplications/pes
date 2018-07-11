@@ -36,11 +36,29 @@ public class UploadFileService {
 			byte[] bytes = file.getBytes();
 			
 			Path teste = FileSystems.getDefault().getPath("/api/v1/namespaces/pes/persistentvolumeclaims/upload", newFileName);
-			System.out.println( "teste" + teste);
+			System.out.println( "teste1" + teste);
 			try {
 				Files.write(teste, bytes);
 			} catch (Exception e) {
-				System.out.println("teste1: " + e.getMessage() + e.getCause());
+				System.out.println("teste1 erro: " + e.getMessage() + e.getCause());
+				e.printStackTrace();
+			}
+			
+			Path teste2 = FileSystems.getDefault().getPath("/upload ", newFileName);
+			System.out.println( "teste2" + teste);
+			try {
+				Files.write(teste2, bytes);
+			} catch (Exception e) {
+				System.out.println("teste2 erro: " + e.getMessage() + e.getCause());
+				e.printStackTrace();
+			}
+
+			Path teste3 = FileSystems.getDefault().getPath("volume-8a57q/upload ", newFileName);
+			System.out.println( "teste3" + teste);
+			try {
+				Files.write(teste3, bytes);
+			} catch (Exception e) {
+				System.out.println("teste3 erro: " + e.getMessage() + e.getCause());
 				e.printStackTrace();
 			}
 
