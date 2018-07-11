@@ -19,7 +19,7 @@ import br.com.usp.labis.bean.Protein;
 public class OutputFileService {
 
 	//private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
-	private final String UPLOADED_FOLDER = File.separator + "app-root" + File.separator + "data";
+	private final String UPLOADED_FOLDER = File.separator + "app-root" + File.separator + "data" + File.separator ;
 	
 	private final String FILE_EXTENSION = ".XLS";
 
