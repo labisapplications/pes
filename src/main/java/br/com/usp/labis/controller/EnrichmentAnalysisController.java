@@ -19,6 +19,6 @@ public class EnrichmentAnalysisController {
 	    @PostMapping
 	    public void processEnrichmentAnalysis(@RequestParam("file") MultipartFile file) {
 			//enrichmentAnalysisService.processEnrichmentAnalysis(file, minProteinsPerGoTerm);
-			enrichmentAnalysisService.processEnrichmentAnalysis(file, 9606, 2, 0.5, 1000, 0.05);
+			enrichmentAnalysisService.processEnrichmentAnalysis(file, 9606, 3, 0.5, 100, 0.05);
 	    }
 }

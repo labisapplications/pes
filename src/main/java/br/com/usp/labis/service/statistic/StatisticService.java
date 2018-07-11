@@ -396,13 +396,14 @@ public class StatisticService {
 							: goTermCondition.getCoreWeight();
 
 					for (NullDistribution nullDistribution : nullDistributions) {
-
-						for (Double weight : nullDistribution.getWeights()) {
-							if (weight > weightToCompare) {
-								filteredWeight.add(weight);
-							}
+						System.out.println("---weightToCompare: " + weightToCompare);
+						System.out.println("weight: " + nullDistribution.getWeight());
+						if (nullDistribution.getWeight() > weightToCompare) {
+							filteredWeight.add(nullDistribution.getWeight());
 						}
+
 					}
+					System.out.println("---filteredWeight: " + filteredWeight.size());
 
 					Double pvalueCalculated = filteredWeight.size() / (numberOfDistributions + 0.000000001);
 
