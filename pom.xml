@@ -6,7 +6,7 @@
 	<groupId>br.com.usp.labis</groupId>
 	<artifactId>spring-boot-rest</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>pes</name>
 	<description>Protein Enrichment Analysis</description>
@@ -56,6 +56,24 @@
     		<version>3.0</version>
 		</dependency>
      	
+     	<dependency>
+      		<groupId>org.springframework.boot</groupId>
+      			<artifactId>spring-boot-starter-web</artifactId>
+     			 <exclusions>
+        			<exclusion>
+          				<groupId>org.springframework.boot</groupId>
+          				<artifactId>spring-boot-starter-tomcat</artifactId>
+        			</exclusion>
+     			 </exclusions>
+    	</dependency>
+    	
+    	<!-- We need to include the javax.servlet API specs, the implementation will be provided by Wildfly / JBoss-->
+    	<dependency>
+     	 	<groupId>javax.servlet</groupId>
+      		<artifactId>javax.servlet-api</artifactId>
+      		<scope>provided</scope>
+    	</dependency>
+       	
 	</dependencies>
 
 	<build>
