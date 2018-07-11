@@ -13,12 +13,16 @@ import br.com.usp.labis.service.EnrichmentAnalysisService;
 @RequestMapping("/pes")
 public class EnrichmentAnalysisController {
 
-	   @Autowired
-	    private EnrichmentAnalysisService enrichmentAnalysisService;
-		 
-	    @PostMapping
-	    public void processEnrichmentAnalysis(@RequestParam("file") MultipartFile file) {
-			//enrichmentAnalysisService.processEnrichmentAnalysis(file, minProteinsPerGoTerm);
-			enrichmentAnalysisService.processEnrichmentAnalysis(file, 9606, 2, 0.5, 100, 0.05);
-	    }
+	@Autowired
+	private EnrichmentAnalysisService enrichmentAnalysisService;
+
+	@PostMapping
+	public void processEnrichmentAnalysis(@RequestParam("file") MultipartFile file,
+			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,
+			@RequestParam("toleranceFactor") Double toleranceFactor,
+			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
+		
+		enrichmentAnalysisService.processEnrichmentAnalysis(file, taxonId, minProteins, toleranceFactor,
+				nullDistributions, pvalue);
+	}
 }
