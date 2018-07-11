@@ -1,5 +1,4 @@
 package br.com.usp.labis.service.file;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class UploadFileService {
 
-	private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
+	//private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
+	private final String UPLOADED_FOLDER =  File.separator + "uploaded_file" + File.separator;
+
 
 	private final String FILE_EXTENSION = ".XLS";
 
