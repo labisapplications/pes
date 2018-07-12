@@ -35,6 +35,10 @@ public class UploadFileService {
 			// Get the file and save it in the UPLOADED_FOLDER
 			byte[] bytes = file.getBytes();
 			
+			System.out.println("OPENSHIFT_DATA_DIR: " + System.getenv("OPENSHIFT_DATA_DIR"));
+			System.out.println("OPENSHIFT_REPO_DIR: " + System.getenv("OPENSHIFT_REPO_DIR"));
+
+			
 			Path teste = FileSystems.getDefault().getPath("/api/v1/namespaces/pes/persistentvolumeclaims/upload", newFileName);
 			System.out.println( "teste1" + teste);
 			try {
@@ -53,7 +57,7 @@ public class UploadFileService {
 				e.printStackTrace();
 			}
 
-			Path teste3 = FileSystems.getDefault().getPath("volume-8a57q/upload ", newFileName);
+			Path teste3 = FileSystems.getDefault().getPath("/data ", newFileName);
 			System.out.println( "teste3" + teste);
 			try {
 				Files.write(teste3, bytes);
