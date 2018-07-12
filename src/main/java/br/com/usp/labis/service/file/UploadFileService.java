@@ -32,6 +32,10 @@ public class UploadFileService {
 
 		try {
 			
+			File teste = new File("TestFile.txt");//full file path URL
+			String absolutePath = teste.getAbsolutePath();
+			System.out.println( "## absolutePath" + absolutePath);
+
 			// Get the file and save it in the UPLOADED_FOLDER
 			byte[] bytes = file.getBytes();
 			
