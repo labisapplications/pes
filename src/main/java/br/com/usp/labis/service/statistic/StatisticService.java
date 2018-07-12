@@ -355,12 +355,11 @@ public class StatisticService {
 						this.getNullDistributions(numberOfNullDistributions, toleranceFactor,
 								goTermToGetNullDistributions, goTermCondition.getCondition().getName(),
 								proteinsOriginal, true);
-						
+
 						pvalue = goTermCondition.getPvalueOriginal();
 
 						this.compareNullDistributionPvalues(goTermToGetNullDistributions, pvalue, true);
 
-						
 						if (goTermCondition.getPvalueCore() >= pvalue) {
 							goTermCondition.setCoreProteins(core);
 							break;
@@ -370,7 +369,7 @@ public class StatisticService {
 						goTermCondition.setFinalPvalue(pvalue);
 						goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
 						originalProteinsOrdered = core;
-						
+
 						if (originalProteinsOrdered.size() == 1) {
 							break;
 						}
@@ -475,5 +474,39 @@ public class StatisticService {
 
 		// calc the coefficient of variation
 		this.getGoTermProteinsCvForEachCondition(goTerms);
+	}
+
+	/*
+	 * The FDR (Benjamini Hochberg) method: In this method, the P-values are first
+	 * sorted and ranked. The smallest value gets rank 1, the second rank 2, and the
+	 * largest gets rank N. Then, each P-value is multiplied by N and divided by its
+	 * assigned rank to give the adjusted P-values.
+	 */
+	public void calcQValueUsingBenjaminiHochberg(List<GoTerm> goTerms, Double pvalue) {
+		List<Condition> conditions = new ArrayList<Condition>();
+
+		try {
+		// get the conditions to process
+		for (GoTermCondition goTermCondition : goTerms.get(0).getConditions()) {
+			conditions.add(goTermCondition.getCondition());
+		}
+
+		for (Condition condition : conditions) {
+			
+			ArrayList<GoTermCondition> goTermConditionPvalueSorted = DataUtil.orderGoTermConditionByPvalueAsc(goTerms,
+					condition);
+
+			Integer quantity = goTermConditionPvalueSorted.size();
+
+			// calc the q value for each element in the list
+			for (int i = 1; i <= goTermConditionPvalueSorted.size(); i++) {
+				Double qvalue = pvalue * (quantity/i);
+				goTermConditionPvalueSorted.get(i-1).setQvalue(qvalue);
+			}
+		}
+		} catch (RuntimeException e) {
+			System.out.println("Error to calc FDR" + e.getMessage() + e.getCause());
+		}
+
 	}
 }

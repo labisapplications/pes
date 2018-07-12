@@ -1,6 +1,7 @@
 package br.com.usp.labis.service.file;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -12,9 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class UploadFileService {
 
-	// private final String UPLOADED_FOLDER = "C:" + File.separator +
-	// "uploaded_file" + File.separator;
-	private final String UPLOADED_FOLDER = System.getenv("OPENSHIFT_DATA_DIR") ;
+	 private final String UPLOADED_FOLDER = "C:" + File.separator +  "uploaded_file" + File.separator;
+	//private final String UPLOADED_FOLDER = System.getenv("OPENSHIFT_DATA_DIR") ;
 
 	private final String FILE_EXTENSION = ".XLS";
 
@@ -29,35 +29,27 @@ public class UploadFileService {
 
 		String newFileName = System.currentTimeMillis() + FILE_EXTENSION;
 		File uploadedFile = null;
-
+		
+		//TEST UPLOAD OPENSHIFT - BEGIN
 		try {
 			
+			byte[] bytes = file.getBytes();
 			File teste = new File("TestFile.txt");//full file path URL
 			String absolutePath = teste.getAbsolutePath();
 			System.out.println( "## absolutePath" + absolutePath);
-
-			// Get the file and save it in the UPLOADED_FOLDER
+			
+			FileOutputStream out = new FileOutputStream("TestFile");
+			out.write(bytes);
+			out.close();
+			
+		} catch (Exception e) {
+			System.out.println("error teste openshift upload: " + e.getMessage() + e.getCause());
+		}
+		//TEST UPLOAD OPENSHIFT - END
+		
+		try {
+				
 			byte[] bytes = file.getBytes();
-			
-			Path teste2 = FileSystems.getDefault().getPath(newFileName);
-			System.out.println( "teste2" + teste2);
-			try {
-				Files.write(teste2, bytes);
-			} catch (Exception e) {
-				System.out.println("teste1 erro: " + e.getMessage() + e.getCause());
-				e.printStackTrace();
-			}
-			
-						
-			Path teste1 = FileSystems.getDefault().getPath("/upload", newFileName);
-			System.out.println( "teste1" + teste1);
-			try {
-				Files.write(teste1, bytes);
-			} catch (Exception e) {
-				System.out.println("teste1 erro: " + e.getMessage() + e.getCause());
-				e.printStackTrace();
-			} 
-			
 			
 			Path path = FileSystems.getDefault().getPath(UPLOADED_FOLDER, newFileName);
 			Files.write(path, bytes);

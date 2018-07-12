@@ -21,6 +21,7 @@ public class GoTermCondition {
 	List<Protein> coreProteins;
 	List<NullDistribution> nullDistributionsOriginal;
 	List<NullDistribution> nullDistributionsCore;
+	Double qvalue;
 
 	public Condition getCondition() {
 		return condition;
@@ -157,6 +158,14 @@ public class GoTermCondition {
 	public void setFinalWeight(Double finalWeight) {
 		this.finalWeight = finalWeight;
 	}
+	
+	public Double getQvalue() {
+		return qvalue;
+	}
+
+	public void setQvalue(Double qvalue) {
+		this.qvalue = qvalue;
+	}
 
 	@Override
 	public int hashCode() {
@@ -278,4 +287,7 @@ public class GoTermCondition {
 			return false;
 		return true;
 	}
+
+
+	
 }

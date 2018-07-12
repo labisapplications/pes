@@ -154,6 +154,9 @@ public class EnrichmentAnalysisService {
 				}
 			}
 
+			//calc the q value
+			statisticService.calcQValueUsingBenjaminiHochberg(goTerms,  pvalue) ;
+			
 			// create output file
 			resultFilePath = outputFileService.exportToExcel(goTerms);
 

@@ -7,11 +7,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import br.com.usp.labis.bean.Condition;
+import br.com.usp.labis.bean.GoTerm;
+import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 
@@ -201,6 +202,30 @@ public class DataUtil {
 			                              (e1, e2) -> e1, LinkedHashMap::new));
 		
 		return new ArrayList<>(proteinConditionWeightSorted.keySet());
+
+	}
+	
+	
+	public static ArrayList<GoTermCondition> orderGoTermConditionByPvalueAsc(List<GoTerm> goTerms, Condition condition) {
+		Map<GoTermCondition, Double> goTermConditionPvalue = new HashMap<GoTermCondition, Double>();
+
+		for (GoTerm goTerm : goTerms) {
+
+			for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+				if(goTermCondition.getCondition().getName().equalsIgnoreCase(condition.getName())) {
+					goTermConditionPvalue.put(goTermCondition, goTermCondition.getFinalPvalue());
+				}
+			}
+		}
+		
+		//get the proteins ordered asc by condition weight
+		Map<GoTermCondition, Double> goTermConditionPvalueSorted = 
+				goTermConditionPvalue.entrySet().stream()
+			    .sorted(Entry.comparingByValue())
+			    .collect(Collectors.toMap(Entry::getKey, Entry::getValue,
+			                              (e1, e2) -> e1, LinkedHashMap::new));
+		
+		return new ArrayList<>(goTermConditionPvalueSorted.keySet());
 
 	}
 }
