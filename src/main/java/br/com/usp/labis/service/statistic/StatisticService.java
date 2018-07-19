@@ -183,17 +183,20 @@ public class StatisticService {
 		System.out.println("maxStatisticTests: " + maxStatisticTests);
 
 		for (Protein protein : proteins) {
+			
 			for (Condition condition : protein.getConditions()) {
 
-				Double maxMeanCondition = maxMeans.get(condition.getName());
-				Double maxCvCondition = maxCvs.get(condition.getName());
-				Double maxStatisticTestCondition = maxStatisticTests;
+				Double maxMeanCondition = maxMeans.get(condition.getName()) == null ? 0.00 : maxMeans.get(condition.getName()) ;
+				Double maxCvCondition = maxCvs.get(condition.getName()) == null ? 0.00 : maxCvs.get(condition.getName()) ;
+				Double maxStatisticTestCondition = maxStatisticTests == null ? 0.00 : maxStatisticTests;
 
-				Double cvp = maxMeanCondition / maxCvCondition;
-				Double test = maxMeanCondition / maxStatisticTestCondition;
+				Double cvp = maxMeanCondition / (maxCvCondition + 0.0000000001);
+				Double test = maxMeanCondition / (maxStatisticTestCondition + + 0.0000000001);
 
-				Double weight = (condition.getMean() - 0.5 * cvp - 0.5 * test + maxMeanCondition - 1)
+				Double weight = (condition.getMean() - (0.5 * cvp) - (0.5 * test) + maxMeanCondition - 1)
 						/ (2 * maxMeanCondition - 2);
+				
+				weight = weight == null ||  Double.isInfinite(weight) || weight < 0.000 ? 0.00 : weight;
 
 				condition.setWeight(weight);
 
@@ -217,7 +220,7 @@ public class StatisticService {
 
 		double[] array = DataUtil.getArray(means);
 
-		double mean = DataUtil.getSumDoubleValues(array) / array.length;
+		double mean = DataUtil.getSumDoubleValues(array) / (array.length + 0000000001);
 
 		double stdeviation = this.calculateStandardDeviation(array);
 
@@ -479,9 +482,9 @@ public class StatisticService {
 	/*
 	 * The FDR (Benjamini Hochberg) method: In this method, the P-values are first
 	 * sorted and ranked. The smallest value gets rank 1, the second rank 2, and the
-	 * largest gets rank N. Then, each P-value is multiplied by N and divided by its
-	 * assigned rank to give the adjusted P-values.
-	 */
+	 * largest gets rank N. Then, Benjamini-Hochberg critical value is (i/m)Q
+	 *  where i is the rank, m is the total number of tests, and Q is the false discovery rate you choose.	
+	 *  */
 	public void calcQValueUsingBenjaminiHochberg(List<GoTerm> goTerms, Double pvalue) {
 		List<Condition> conditions = new ArrayList<Condition>();
 
@@ -496,16 +499,29 @@ public class StatisticService {
 			ArrayList<GoTermCondition> goTermConditionPvalueSorted = DataUtil.orderGoTermConditionByPvalueAsc(goTerms,
 					condition);
 
-			Integer quantity = goTermConditionPvalueSorted.size();
+			//Integer quantity = goTermConditionPvalueSorted.size();
 
+			//get the rank for each gotermcondition. Same pvalues have the same rank position.
+			Double lastFinalPValue = goTermConditionPvalueSorted.get(0).getFinalPvalue() == null ? 0.00 : goTermConditionPvalueSorted.get(0).getFinalPvalue() ;
+			Double rank = 1.00;
+			
+			for (int i = 0; i < goTermConditionPvalueSorted.size(); i++) {
+				Double finalPValue = goTermConditionPvalueSorted.get(i).getFinalPvalue() == null ? 0.00 : goTermConditionPvalueSorted.get(i).getFinalPvalue() ;
+				if(finalPValue.doubleValue()  != lastFinalPValue.doubleValue() ) {
+					lastFinalPValue = finalPValue;
+					rank += 1.00;
+				} 
+				goTermConditionPvalueSorted.get(i).setRank(rank.intValue());
+			}
+			
 			// calc the q value for each element in the list
-			for (int i = 1; i <= goTermConditionPvalueSorted.size(); i++) {
-				Double qvalue = pvalue * (quantity/i);
-				goTermConditionPvalueSorted.get(i-1).setQvalue(qvalue);
+			for (int i = 0; i < goTermConditionPvalueSorted.size(); i++) {
+				Double qvalue = goTermConditionPvalueSorted.get(i).getFinalPvalue()  * (goTermConditionPvalueSorted.get(i).getRank() / rank);
+				goTermConditionPvalueSorted.get(i).setQvalue(qvalue);
 			}
 		}
 		} catch (RuntimeException e) {
-			System.out.println("Error to calc FDR" + e.getMessage() + e.getCause());
+			System.out.println("Error to calc FDR: " + e.getMessage() + e.getCause());
 		}
 
 	}

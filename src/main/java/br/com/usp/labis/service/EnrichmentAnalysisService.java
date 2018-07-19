@@ -95,8 +95,12 @@ public class EnrichmentAnalysisService {
 			System.out.println("Mapping go terms and proteins");
 			// associate each go id to the proteins in the data file
 			List<GoTerm> goTerms = mapGoTermsAndProteins(proteins, minProteinsPerGoTerm);
+			
+			if(goTerms == null || goTerms.isEmpty()) {
+				throw new RuntimeException("Could not map go terms and min proteins ");
+			} 
 
-			for (GoTerm goTerm : goTerms) {
+			/*for (GoTerm goTerm : goTerms) {
 				String print = goTerm.getGoAnnotation().getGoId() + " - proteins: ";
 				StringBuilder prot = new StringBuilder();
 				for (Protein protein : goTerm.getProteins()) {
@@ -105,7 +109,7 @@ public class EnrichmentAnalysisService {
 				}
 				System.out.println(print + prot.toString());
 
-			}
+			}*/
 
 			System.out.println("Calculating original go term weight");
 			statisticService.calculateGoTermWeight(goTerms, proteins, null);
@@ -119,7 +123,7 @@ public class EnrichmentAnalysisService {
 			// get the null distribution higher than pvalue for each condition
 			statisticService.compareNullDistributionPvalues(goTerms, pvalue, false);
 			
-			System.out.println("Before the Core analysis: ");
+			/*System.out.println("Before the Core analysis: ");
 			for (GoTerm goTerm : goTerms) {
 				for (GoTermCondition goTermCondition : goTerm.getConditions()) {
 					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  "
@@ -132,33 +136,21 @@ public class EnrichmentAnalysisService {
 					}
 					System.out.println(print + prot.toString());
 				}
-			}
+			}*/
 
 			// get the core proteins for each go term
 			System.out.println("Getting the core proteins");
 			statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
 					toleranceFactor, pvalue, proteins);
 
-			System.out.println("Getting the result: ");
-			for (GoTerm goTerm : goTerms) {
-				for (GoTermCondition goTermCondition : goTerm.getConditions()) {
-					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  "
-							+ goTermCondition.getFinalPvalue() + " - weight: " + goTermCondition.getFinalWeight()
-							+ " - proteins: ";
-					StringBuilder prot = new StringBuilder();
-					for (Protein protein : goTermCondition.getCoreProteins()) {
-						prot.append(protein.getProteinId());
-						prot.append(" ");
-					}
-					System.out.println(print + prot.toString());
-				}
-			}
-
 			//calc the q value
 			statisticService.calcQValueUsingBenjaminiHochberg(goTerms,  pvalue) ;
 			
 			// create output file
 			resultFilePath = outputFileService.exportToExcel(goTerms);
+			
+			System.out.println("exported to excel");
+
 
 			// get antology for each annotation
 			// this.getGoAntologyForAnnotations(proteins);
@@ -187,6 +179,11 @@ public class EnrichmentAnalysisService {
 				System.out.println("--CONDITION => " + condition.getName());
 				for (Replicate replicate : condition.getReplicates()) {
 					System.out.println("---REPLICATE => " + replicate.getValue());
+					
+					if(replicate.getValue() > 0.00) {
+						System.out.println("---REPLICATE => " + replicate.getValue());
+
+					}
 				}
 			}
 

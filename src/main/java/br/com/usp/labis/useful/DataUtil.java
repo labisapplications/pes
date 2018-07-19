@@ -27,6 +27,8 @@ public class DataUtil {
 		for (int index = 0; index < condition.getReplicates().size(); index++) {
 			Replicate replicate = condition.getReplicates().get(index);
 			values[index] = replicate.getValue();
+			System.out.println(replicate.getName() +" - value:" + replicate.getValue());
+
 		}
 
 		return values;
@@ -208,7 +210,7 @@ public class DataUtil {
 	
 	public static ArrayList<GoTermCondition> orderGoTermConditionByPvalueAsc(List<GoTerm> goTerms, Condition condition) {
 		Map<GoTermCondition, Double> goTermConditionPvalue = new HashMap<GoTermCondition, Double>();
-
+		
 		for (GoTerm goTerm : goTerms) {
 
 			for (GoTermCondition goTermCondition : goTerm.getConditions()) {

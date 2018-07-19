@@ -18,7 +18,7 @@ public class GoAnnotationService {
 	private final String BASE_URL = "https://www.ebi.ac.uk/QuickGO/services/annotation/search";
 
 	public Protein getGoAnnotationsForProteinAndTaxon(Protein protein, GoAnnotationFilter filters) {
-		System.out.println("ANNOTATION FOR protein =>>>> " + protein.getProteinId());
+		//System.out.println("ANNOTATION FOR protein =>>>> " + protein.getProteinId());
 
 		try {
 				RestTemplate restTemplate = new RestTemplate();

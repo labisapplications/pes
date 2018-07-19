@@ -22,7 +22,7 @@ public class OutputFileService {
 
 	private final String FILE_EXTENSION = ".XLS";
 
-	private static String[] COLUMNS = { "GO_ID", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE", "QVALUE", "WEIGHT", "CORE" };
+	private static String[] COLUMNS = { "GO_ID", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE", "QVALUE", "RANK", "WEIGHT", "CORE" };
 
 	public String exportToExcel(List<GoTerm> goTerms) {
 		
@@ -58,8 +58,10 @@ public class OutputFileService {
 						row.createCell(4).setCellValue(goTermCondition2.getFinalPvalue());
 						
 						row.createCell(5).setCellValue(goTermCondition2.getQvalue());
+						
+						row.createCell(6).setCellValue(goTermCondition2.getRank());
 
-						row.createCell(6).setCellValue(goTermCondition2.getFinalWeight());
+						row.createCell(7).setCellValue(goTermCondition2.getFinalWeight());
 
 						StringBuilder coreProteins = new StringBuilder();
 						
@@ -68,7 +70,7 @@ public class OutputFileService {
 							coreProteins.append(" ");
 						}
 
-						row.createCell(7).setCellValue(coreProteins.toString());
+						row.createCell(8).setCellValue(coreProteins.toString());
 						
 						//adjust the cells width
 						for(int colNum = 0; colNum < row.getLastCellNum();colNum++)   {

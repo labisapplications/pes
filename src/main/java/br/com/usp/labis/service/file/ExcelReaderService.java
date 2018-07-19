@@ -117,6 +117,9 @@ public class ExcelReaderService {
 		Iterator<Cell> cellIterator = currentRow.iterator();
 		Integer columnNumber = 0;
 		String key = null;
+		Boolean isGeneNamePresent = currentRow.getCell(3) != null ? true : false;
+		Boolean isProteinNamePresent = currentRow.getCell(2) != null ? true : false;
+		Boolean isMajorityProteinNamePresent = currentRow.getCell(1) != null ? true : false;
 
 		while (cellIterator.hasNext()) {
 
@@ -126,14 +129,22 @@ public class ExcelReaderService {
 			if (columnNumber == 1) {
 				key = currentCell.getStringCellValue();
 				rows.put(key, new ArrayList<Object>());
+
+			} else if (columnNumber == 2 && !isMajorityProteinNamePresent) {
+				rows.get(key).add(" ");
+				
+			} else if (columnNumber == 3 && !isProteinNamePresent) {
+				rows.get(key).add(" ");
+				
+			} else if (columnNumber == 4 && !isGeneNamePresent) {
+				rows.get(key).add(" ");
 			}
 
 			if (currentCell.getCellTypeEnum() == CellType.STRING) {
 				rows.get(key).add(currentCell.getStringCellValue());
 			} else if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
 				rows.get(key).add(currentCell.getNumericCellValue());
-			} else if (currentCell.getCellTypeEnum() == CellType.ERROR
-					|| currentCell.getCellTypeEnum() == CellType.BLANK) {
+			} else {
 				rows.get(key).add(0);
 			}
 		}
@@ -159,26 +170,26 @@ public class ExcelReaderService {
 			// just considerer the first protein id in the list of protein'ids because it is
 			// probably the most significant
 			// put the other proteins id in a separated array to be used if necessary
-			
+
 			if (proteinNames != null) {
 				String[] proteinIdsArray = proteinNames.split(";");
-				
-				for(int i = 0; i < proteinIdsArray.length; i++) {
+
+				for (int i = 0; i < proteinIdsArray.length; i++) {
 					String proteinId = proteinIdsArray[i];
-					
-					//ignores '-' in the protein id (if it exists)
-					if(proteinId.lastIndexOf("-") != -1) {
+
+					// ignores '-' in the protein id (if it exists)
+					if (proteinId.lastIndexOf("-") != -1) {
 						proteinId = proteinId.substring(0, proteinId.lastIndexOf("-"));
 					}
-					
-					if(i == 0) {		
+
+					if (i == 0) {
 						protein.setProteinId(proteinId);
 					} else {
-					
-						if(protein.getOtherProteinsIdAssociated() == null) {
+
+						if (protein.getOtherProteinsIdAssociated() == null) {
 							protein.setOtherProteinsIdAssociated(new ArrayList<String>());
-						}	
-					
+						}
+
 						protein.getOtherProteinsIdAssociated().add(proteinId);
 					}
 				}
@@ -278,14 +289,16 @@ public class ExcelReaderService {
 	private Map<String, List<Integer>> getConditionsAndReplicates(Map<String, List<Object>> rows) {
 		Map<String, List<Integer>> dataColumnPosition = new HashMap<String, List<Integer>>();
 		List<Object> columns = rows.get(PROTEIN_IDS);
+		
 
 		for (int index = 0; index < columns.size(); index++) {
 			String column = (String) columns.get(index);
-
+			
 			if (column.contains(LFQ_INTENSITY)) {
-
 				// get the condition name
 				String condition = column.replaceAll(LFQ_INTENSITY, "");
+				//Integer indexLastUnderscore = column.lastIndexOf("_");
+				//condition = condition.replaceAll(column.substring(indexLastUnderscore), " ");
 				condition = condition.replaceAll(" ", "");
 				condition = condition.replaceAll("\\d+", "");
 
@@ -293,10 +306,9 @@ public class ExcelReaderService {
 				if (dataColumnPosition.get(condition) == null) {
 					dataColumnPosition.put(condition, new ArrayList<Integer>());
 				}
-
+				System.out.println("COLUMN: " + column + " - INDEX: " + index);
 				// put the column replicate position for the condition
 				dataColumnPosition.get(condition).add(index);
-
 			}
 		}
 

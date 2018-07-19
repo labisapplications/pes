@@ -22,6 +22,7 @@ public class GoTermCondition {
 	List<NullDistribution> nullDistributionsOriginal;
 	List<NullDistribution> nullDistributionsCore;
 	Double qvalue;
+	Integer rank;
 
 	public Condition getCondition() {
 		return condition;
@@ -165,6 +166,14 @@ public class GoTermCondition {
 
 	public void setQvalue(Double qvalue) {
 		this.qvalue = qvalue;
+	}
+
+	public Integer getRank() {
+		return rank;
+	}
+
+	public void setRank(Integer rank) {
+		this.rank = rank;
 	}
 
 	@Override
