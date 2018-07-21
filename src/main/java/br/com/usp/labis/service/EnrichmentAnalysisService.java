@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.GoAnnotation;
 import br.com.usp.labis.bean.GoTerm;
-import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 import br.com.usp.labis.service.file.ExcelReaderService;

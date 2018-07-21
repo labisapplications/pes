@@ -2,6 +2,7 @@ package br.com.usp.labis.service.file;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -92,7 +93,17 @@ public class OutputFileService {
 			e.printStackTrace();
 		}
 		
-		return filePath;
+		return filePath;	
+	}
+	
+	public File getFileByName(String fileName) {
+		File fileOutput = null;
+		try {
+			fileOutput = new File(UPLOADED_FOLDER + fileName);
+		} catch (RuntimeException e) {
+			System.out.println("IO Exception: " + fileName + " - " + e.getMessage() + e.getCause());
+		}
+		return fileOutput;
 	}
 
 }

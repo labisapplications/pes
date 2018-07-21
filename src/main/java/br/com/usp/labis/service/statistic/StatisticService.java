@@ -191,7 +191,7 @@ public class StatisticService {
 				Double maxStatisticTestCondition = maxStatisticTests == null ? 0.00 : maxStatisticTests;
 
 				Double cvp = maxMeanCondition / (maxCvCondition + 0.0000000001);
-				Double test = maxMeanCondition / (maxStatisticTestCondition + + 0.0000000001);
+				Double test = maxMeanCondition / (maxStatisticTestCondition +  0.0000000001);
 
 				Double weight = (condition.getMean() - (0.5 * cvp) - (0.5 * test) + maxMeanCondition - 1)
 						/ (2 * maxMeanCondition - 2);
