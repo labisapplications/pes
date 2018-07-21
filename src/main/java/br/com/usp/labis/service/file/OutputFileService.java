@@ -99,7 +99,7 @@ public class OutputFileService {
 	public File getFileByName(String fileName) {
 		File fileOutput = null;
 		try {
-			fileOutput = new File(UPLOADED_FOLDER + fileName);
+			fileOutput = new File(fileName);
 		} catch (RuntimeException e) {
 			System.out.println("IO Exception: " + fileName + " - " + e.getMessage() + e.getCause());
 		}
