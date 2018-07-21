@@ -31,8 +31,10 @@ public class EnrichmentAnalysisController {
 	@Autowired
 	private EnrichmentAnalysisService enrichmentAnalysisService;
 	
+	@Autowired
 	private OutputFileService outputFileService;
 
+	@Autowired
 	private UploadFileService uploadFileService;
 	
 	@CrossOrigin
