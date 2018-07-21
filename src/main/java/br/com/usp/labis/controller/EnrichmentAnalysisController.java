@@ -42,25 +42,29 @@ public class EnrichmentAnalysisController {
 			@RequestParam("toleranceFactor") Double toleranceFactor,
 			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
 
-		String resultFilePath = enrichmentAnalysisService.processEnrichmentAnalysis(file, taxonId, minProteins,
+		String resultFile = enrichmentAnalysisService.processEnrichmentAnalysis(file, taxonId, minProteins,
 				toleranceFactor, nullDistributions, pvalue);
+		
+		System.out.println("resultFilePath: " + resultFile);
+
+		File fileOutput = new File(resultFilePath);
+		resultFile = fileOutput != null ? fileOutput.getName() : null;
 		
 		HttpHeaders headers = new HttpHeaders();
 	    headers.add("Content-Type", "application/json; charset=utf-8");
 		
-		System.out.println("resultFilePath: " + resultFilePath);
 		
-		return new ResponseEntity<>(resultFilePath,  headers , HttpStatus.OK);
+		return new ResponseEntity<>(resultFile,  headers , HttpStatus.OK);
 	}
 
 
 	@CrossOrigin
-	@GetMapping("/download/{filepath}")
-	public ResponseEntity<Resource> downloadFile(@PathParam("filepath")  String filepath, HttpServletResponse response) {
+	@GetMapping("/download/{fileName}")
+	public ResponseEntity<Resource> downloadFile(@PathParam("fileName")  String fileName, HttpServletResponse response) {
 
-		System.out.println("Downloading: " + filepath);
+		System.out.println("Downloading: " + fileName);
 
-		File fileOutput = outputFileService.getFileByName(filepath);
+		File fileOutput = outputFileService.getFileByName(fileName);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -72,8 +76,8 @@ public class EnrichmentAnalysisController {
 	
 	@CrossOrigin
 	@GetMapping("/delete/{fileName}")
-	public void deleteFile(@PathParam("fileName") String filepath) {
-		File file = outputFileService.getFileByName(filepath);
+	public void deleteFile(@PathParam("fileName") String fileName) {
+		File file = outputFileService.getFileByName(fileName);
 		if(file != null) {
 			uploadFileService.removeUploadedFile(file);
 		}
