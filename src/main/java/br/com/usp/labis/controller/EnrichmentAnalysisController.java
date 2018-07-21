@@ -59,8 +59,8 @@ public class EnrichmentAnalysisController {
 
 
 	@CrossOrigin
-	@GetMapping("/download/{fileName}")
-	public ResponseEntity<Resource> downloadFile(@PathParam("fileName")  String fileName, HttpServletResponse response) {
+	@GetMapping("download")
+	public ResponseEntity<Resource> downloadFile(@RequestParam("fileName")  String fileName) {
 
 		System.out.println("Downloading: " + fileName);
 
@@ -75,8 +75,8 @@ public class EnrichmentAnalysisController {
 	}
 	
 	@CrossOrigin
-	@GetMapping("/delete/{fileName}")
-	public void deleteFile(@PathParam("fileName") String fileName) {
+	@GetMapping("delete")
+	public void deleteFile(@RequestParam("fileName") String fileName) {
 		File file = outputFileService.getFileByName(fileName);
 		if(file != null) {
 			uploadFileService.removeUploadedFile(file);
