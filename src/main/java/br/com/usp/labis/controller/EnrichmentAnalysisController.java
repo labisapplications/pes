@@ -47,7 +47,7 @@ public class EnrichmentAnalysisController {
 		
 		System.out.println("resultFilePath: " + resultFile);
 
-		File fileOutput = new File(resultFilePath);
+		File fileOutput = new File(resultFile);
 		resultFile = fileOutput != null ? fileOutput.getName() : null;
 		
 		HttpHeaders headers = new HttpHeaders();
