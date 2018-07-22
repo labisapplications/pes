@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,8 +20,9 @@ import br.com.usp.labis.bean.GoAnnotation;
 import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
+import br.com.usp.labis.bean.Result;
 import br.com.usp.labis.service.file.ExcelReaderService;
-import br.com.usp.labis.service.file.OutputFileService;
+import br.com.usp.labis.service.file.OutputService;
 import br.com.usp.labis.service.file.UploadFileService;
 import br.com.usp.labis.service.go.GeneProductService;
 import br.com.usp.labis.service.go.GoAnnotationService;
@@ -37,9 +37,9 @@ public class EnrichmentAnalysisService {
 
 	@Autowired
 	private UploadFileService uploadFileService;
-	
+
 	@Autowired
-	private OutputFileService outputFileService;
+	private OutputService outputService;
 
 	@Autowired
 	private ExcelReaderService excelReaderService;
@@ -55,17 +55,46 @@ public class EnrichmentAnalysisService {
 
 	@Autowired
 	private GoAntologyService goAntologyService;
-
-	public String processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
+	
+	public String processEnrichmentAnalysisToExcel(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
-
+		
 		String resultFilePath = "";
 		
+		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm,
+				toleranceFactor, numberOfNullDistributions, pvalue);
+		
+		resultFilePath = outputService.exportToExcel(goTerms);
+		System.out.println("exported to excel");
+		
+		return resultFilePath;
+	}
+	
+	public Map<String, List<Result>> processEnrichmentAnalysisToMap(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
+			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
+		
+		Map<String, List<Result>> resultMap  = null;
+		
+		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm,
+				toleranceFactor, numberOfNullDistributions, pvalue);
+		
+		resultMap = outputService.exportToMap(goTerms);
+		System.out.println("exported to map");
+		
+		return resultMap;
+	}
+	
+
+	public List<GoTerm> processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
+			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
+
 		List<Protein> proteinsAnnotationNotFound = new ArrayList<Protein>();
 
 		Map<String, Double> maxMean = new HashMap<String, Double>();
 
 		Map<String, Double> maxCv = new HashMap<String, Double>();
+		
+		List<GoTerm> goTerms = null;
 
 		Double maxStatisticTest = null;
 
@@ -94,22 +123,21 @@ public class EnrichmentAnalysisService {
 
 			System.out.println("Mapping go terms and proteins");
 			// associate each go id to the proteins in the data file
-			List<GoTerm> goTerms = mapGoTermsAndProteins(proteins, minProteinsPerGoTerm);
-			
-			if(goTerms == null || goTerms.isEmpty()) {
+			goTerms = mapGoTermsAndProteins(proteins, minProteinsPerGoTerm);
+
+			if (goTerms == null || goTerms.isEmpty()) {
 				throw new RuntimeException("Could not map go terms and min proteins ");
-			} 
+			}
 
-			/*for (GoTerm goTerm : goTerms) {
-				String print = goTerm.getGoAnnotation().getGoId() + " - proteins: ";
-				StringBuilder prot = new StringBuilder();
-				for (Protein protein : goTerm.getProteins()) {
-					prot.append(protein.getProteinId());
-					prot.append(" ");
-				}
-				System.out.println(print + prot.toString());
-
-			}*/
+			/*
+			 * for (GoTerm goTerm : goTerms) { String print =
+			 * goTerm.getGoAnnotation().getGoId() + " - proteins: "; StringBuilder prot =
+			 * new StringBuilder(); for (Protein protein : goTerm.getProteins()) {
+			 * prot.append(protein.getProteinId()); prot.append(" "); }
+			 * System.out.println(print + prot.toString());
+			 * 
+			 * }
+			 */
 
 			System.out.println("Calculating original go term weight");
 			statisticService.calculateGoTermWeight(goTerms, proteins, null);
@@ -122,43 +150,18 @@ public class EnrichmentAnalysisService {
 			System.out.println("Getting null distribution pvalues");
 			// get the null distribution higher than pvalue for each condition
 			statisticService.compareNullDistributionPvalues(goTerms, pvalue, false);
-			
-			/*System.out.println("Before the Core analysis: ");
-			for (GoTerm goTerm : goTerms) {
-				for (GoTermCondition goTermCondition : goTerm.getConditions()) {
-					String print = goTerm.getGoAnnotation().getGoId() + " - pvalue:  "
-							+ goTermCondition.getPvalueOriginal() + " - weight: " + goTermCondition.getOriginalWeight()
-							+ " - proteins: ";
-					StringBuilder prot = new StringBuilder();
-					for (Protein protein : goTermCondition.getOriginalProteins()) {
-						prot.append(protein.getProteinId());
-						prot.append(" ");
-					}
-					System.out.println(print + prot.toString());
-				}
-			}*/
 
 			// get the core proteins for each go term
 			System.out.println("Getting the core proteins");
 			statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
 					toleranceFactor, pvalue, proteins);
 
-			//calc the q value
-			statisticService.calcQValueUsingBenjaminiHochberg(goTerms,  pvalue) ;
-			
-			// create output file
-			resultFilePath = outputFileService.exportToExcel(goTerms);
-			
-			System.out.println("exported to excel");
+			// calc the q value
+			statisticService.calcQValueUsingBenjaminiHochberg(goTerms, pvalue);
 
-
-			// get antology for each annotation
-			// this.getGoAntologyForAnnotations(proteins);
-
-			// create the relationship matrix
 		}
-		
-		return resultFilePath;
+
+		return goTerms;
 	}
 
 	private Double getStatistics(List<Protein> proteins, Map<String, Double> maxMean, Map<String, Double> maxCv) {
@@ -179,8 +182,8 @@ public class EnrichmentAnalysisService {
 				System.out.println("--CONDITION => " + condition.getName());
 				for (Replicate replicate : condition.getReplicates()) {
 					System.out.println("---REPLICATE => " + replicate.getValue());
-					
-					if(replicate.getValue() > 0.00) {
+
+					if (replicate.getValue() > 0.00) {
 						System.out.println("---REPLICATE => " + replicate.getValue());
 
 					}

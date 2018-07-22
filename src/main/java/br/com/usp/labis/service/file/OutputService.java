@@ -2,8 +2,10 @@ package br.com.usp.labis.service.file;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -15,20 +17,22 @@ import org.springframework.stereotype.Component;
 import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
+import br.com.usp.labis.bean.Result;
 
 @Component
-public class OutputFileService {
+public class OutputService {
 
 	private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
 
 	private final String FILE_EXTENSION = ".XLS";
 
-	private static String[] COLUMNS = { "GO_ID", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE", "QVALUE", "RANK", "WEIGHT", "CORE" };
+	private static String[] COLUMNS = { "GO_ID", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE", "QVALUE", "RANK", "WEIGHT",
+			"CORE" };
 
 	public String exportToExcel(List<GoTerm> goTerms) {
-		
-		String filePath = UPLOADED_FOLDER + "result"+ System.currentTimeMillis() + FILE_EXTENSION;
-		
+
+		String filePath = UPLOADED_FOLDER + "result" + System.currentTimeMillis() + FILE_EXTENSION;
+
 		Workbook workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
 
 		for (GoTermCondition goTermCondition : goTerms.get(0).getConditions()) {
@@ -49,32 +53,32 @@ public class OutputFileService {
 						Row row = sheet.createRow(rowNum++);
 
 						row.createCell(0).setCellValue(goTerm.getGoAnnotation().getGoId());
-						
+
 						row.createCell(1).setCellValue(goTerm.getGoAnnotation().getSymbol());
-						
+
 						row.createCell(2).setCellValue(goTerm.getGoAnnotation().getQualifier());
-						
+
 						row.createCell(3).setCellValue(goTerm.getGoAnnotation().getGoAspect().getAspect());
 
 						row.createCell(4).setCellValue(goTermCondition2.getFinalPvalue());
-						
+
 						row.createCell(5).setCellValue(goTermCondition2.getQvalue());
-						
+
 						row.createCell(6).setCellValue(goTermCondition2.getRank());
 
 						row.createCell(7).setCellValue(goTermCondition2.getFinalWeight());
 
 						StringBuilder coreProteins = new StringBuilder();
-						
+
 						for (Protein protein : goTermCondition2.getCoreProteins()) {
 							coreProteins.append(protein.getProteinId());
 							coreProteins.append(" ");
 						}
 
 						row.createCell(8).setCellValue(coreProteins.toString());
-						
-						//adjust the cells width
-						for(int colNum = 0; colNum < row.getLastCellNum();colNum++)   {
+
+						// adjust the cells width
+						for (int colNum = 0; colNum < row.getLastCellNum(); colNum++) {
 							sheet.autoSizeColumn(colNum);
 						}
 					}
@@ -92,10 +96,49 @@ public class OutputFileService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		return filePath;	
+
+		return filePath;
 	}
-	
+
+	public Map<String, List<Result>> exportToMap(List<GoTerm> goTerms) {
+		Map<String, List<Result>> resultMap = new HashMap<String, List<Result>>();
+
+		for (GoTerm goTerm : goTerms) {
+			for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+				if(resultMap.get(goTermCondition.getCondition().getName()) == null) {
+					resultMap.put(goTermCondition.getCondition().getName(), new ArrayList<Result>());
+				}
+			}
+		}
+
+		for (GoTerm goTerm : goTerms) {
+			for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+
+				StringBuilder coreProteins = new StringBuilder();
+				for (Protein protein : goTermCondition.getCoreProteins()) {
+					coreProteins.append(protein.getProteinId());
+					coreProteins.append(" ");
+				}
+
+				Result result = new Result();
+				result.setConditionName(goTermCondition.getCondition().getName());
+				result.setAspect(goTerm.getGoAnnotation().getGoAspect().getAspect());
+				result.setGoId(goTerm.getGoAnnotation().getGoId());
+				result.setGeneName(goTerm.getGoAnnotation().getSymbol());
+				result.setQualifier(goTerm.getGoAnnotation().getQualifier());
+				result.setPvalue(goTermCondition.getFinalPvalue() + "");
+				result.setQvalue(goTermCondition.getQvalue() + "");
+				result.setRank(goTermCondition.getRank() + "");
+				result.setWeight(goTermCondition.getFinalWeight() + "");
+				result.setCore(coreProteins.toString());
+
+				resultMap.get(goTermCondition.getCondition().getName()).add(result);
+			}
+		}
+
+		return resultMap;
+	}
+
 	public File getFileByName(String fileName) {
 		File fileOutput = null;
 		try {
