@@ -6,18 +6,18 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication(scanBasePackages = { "br.com.usp.labis" })
-public class PesApplication extends SpringBootServletInitializer {
-//public class PesApplication {
+//public class PesApplication extends SpringBootServletInitializer {
+public class PesApplication {
 
 
 	public static void main(String[] args) {
 		SpringApplication.run(PesApplication.class, args);
 	}
 
-	
+	/*
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(PesApplication.class);
 	}
-
+*/
 }

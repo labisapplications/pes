@@ -61,9 +61,6 @@ public class EnrichmentAnalysisController {
 		File fileOutput = new File(resultFile);
 		resultFile = fileOutput != null ? fileOutput.getName() : null;
 
-		//HttpHeaders headers = new HttpHeaders();
-		//headers.add("Content-Type", "application/json; charset=utf-8");
-
 		return resultFile;
 	}
 	

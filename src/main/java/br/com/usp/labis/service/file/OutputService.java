@@ -27,7 +27,7 @@ public class OutputService {
 	private final String FILE_EXTENSION = ".XLS";
 
 	private static String[] COLUMNS = { "GO_ID", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE", "QVALUE", "RANK", "WEIGHT",
-			"CORE" };
+			"CORE", "ORIGINAL_WEIGHT", "ORIGINAL_PVALUE", "ORIGINAL_PROTEINS" };
 
 	public String exportToExcel(List<GoTerm> goTerms) {
 
@@ -76,11 +76,24 @@ public class OutputService {
 						}
 
 						row.createCell(8).setCellValue(coreProteins.toString());
+						
+						row.createCell(9).setCellValue(goTermCondition2.getOriginalWeight());
+						row.createCell(10).setCellValue(goTermCondition2.getPvalueOriginal());
+						
+						StringBuilder originalProteins = new StringBuilder();
+
+						for (Protein protein : goTermCondition2.getOriginalProteins()) {
+							originalProteins.append(protein.getProteinId());
+							originalProteins.append(" ");
+						}
+						row.createCell(11).setCellValue(originalProteins.toString());
 
 						// adjust the cells width
 						for (int colNum = 0; colNum < row.getLastCellNum(); colNum++) {
 							sheet.autoSizeColumn(colNum);
 						}
+						
+
 					}
 				}
 			}

@@ -13,6 +13,7 @@ public class Condition {
 	private Double mean;
 	private Double cv; //Coeficient of Variation 
 	private Double weight;
+	private Double sd; //standard deviation
 
 
 	public String getName() {
@@ -53,6 +54,16 @@ public class Condition {
 
 	public void setWeight(Double weight) {
 		this.weight = weight;
+	}
+	
+	
+
+	public Double getSd() {
+		return sd;
+	}
+
+	public void setSd(Double sd) {
+		this.sd = sd;
 	}
 
 	@Override

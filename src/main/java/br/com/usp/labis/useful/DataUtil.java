@@ -1,5 +1,7 @@
 package br.com.usp.labis.useful;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -229,5 +231,13 @@ public class DataUtil {
 		
 		return new ArrayList<>(goTermConditionPvalueSorted.keySet());
 
+	}
+	
+	public static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+	 
+	    BigDecimal bd = new BigDecimal(Double.toString(value));
+	    bd = bd.setScale(places, RoundingMode.HALF_EVEN);
+	    return bd.doubleValue();
 	}
 }

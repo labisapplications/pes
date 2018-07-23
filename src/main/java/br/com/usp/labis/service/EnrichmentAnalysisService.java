@@ -96,7 +96,7 @@ public class EnrichmentAnalysisService {
 		
 		List<GoTerm> goTerms = null;
 
-		Double maxStatisticTest = null;
+		Double maxStatisticTest = null; //max statistic test between conditions
 
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
@@ -149,7 +149,7 @@ public class EnrichmentAnalysisService {
 
 			System.out.println("Getting null distribution pvalues");
 			// get the null distribution higher than pvalue for each condition
-			statisticService.compareNullDistributionPvalues(goTerms, pvalue, false);
+			statisticService.calcNullDistributionPvalues(goTerms, pvalue, false);
 
 			// get the core proteins for each go term
 			System.out.println("Getting the core proteins");
@@ -185,12 +185,11 @@ public class EnrichmentAnalysisService {
 
 					if (replicate.getValue() > 0.00) {
 						System.out.println("---REPLICATE => " + replicate.getValue());
-
 					}
 				}
 			}
 
-			// to calculate the ttest or anova test for protein
+			// to calculate the ttest or anova test for protein (considering all conditions)
 			if (protein.getConditions().size() > 2) {
 				protein.setStatisticTest(statisticService.oneWayAnovaTest(protein.getConditions()));
 			} else {
@@ -207,9 +206,9 @@ public class EnrichmentAnalysisService {
 		DataUtil.getConditionMeans(proteins, conditionsMean);
 		DataUtil.getProteinsStatisticTest(proteins, statisticsTest);
 
-		statisticService.getMaxMean(conditionsMean, maxMean);
-		statisticService.getMaxCv(conditionsCv, maxCv);
-		Double maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest);
+		statisticService.getMaxMean(conditionsMean, maxMean); //get the max mean per condition
+		statisticService.getMaxCv(conditionsCv, maxCv); //get the max cv per condition
+		Double maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest); //get the max statistic test value (considering all conditions)
 
 		statisticService.calculateProteinWeightForEachCondition(proteins, maxMean, maxCv, maxStatisticTest);
 
