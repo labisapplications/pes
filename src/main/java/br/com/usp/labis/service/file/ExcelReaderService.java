@@ -1,7 +1,5 @@
 package br.com.usp.labis.service.file;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.Protein;
@@ -36,14 +35,15 @@ public class ExcelReaderService {
 	 *            data file to be processed
 	 * @return List<Protein> protein list
 	 */
-	public List<Protein> processExcelFile(File file) {
-
+	//public List<Protein> processExcelFile(File file) {
+	public List<Protein> processExcelFile(MultipartFile file) {
 		Workbook workbook = null;
 		List<Protein> proteins = new ArrayList<Protein>();
 
 		try {
-			FileInputStream excelFile = new FileInputStream(file);
-			workbook = new XSSFWorkbook(excelFile);
+			//FileInputStream excelFile = new FileInputStream(file);
+			//workbook = new XSSFWorkbook(excelFile);
+			workbook = new XSSFWorkbook(file.getInputStream());
 			Sheet datatypeSheet = workbook.getSheetAt(0);
 			Iterator<Row> iterator = datatypeSheet.iterator();
 
@@ -290,17 +290,17 @@ public class ExcelReaderService {
 		Map<String, List<Integer>> dataColumnPosition = new HashMap<String, List<Integer>>();
 		List<Object> columns = rows.get(PROTEIN_IDS);
 		
-
 		for (int index = 0; index < columns.size(); index++) {
 			String column = (String) columns.get(index);
 			
 			if (column.contains(LFQ_INTENSITY)) {
-				// get the condition name
+				// get the condition name. Expected format: LFQ_INTENSITY Condition_Replicate
 				String condition = column.replaceAll(LFQ_INTENSITY, "");
-				//Integer indexLastUnderscore = column.lastIndexOf("_");
-				//condition = condition.replaceAll(column.substring(indexLastUnderscore), " ");
+				Integer indexLastUnderscore = column.lastIndexOf("_");
+				condition = condition.replaceAll(column.substring(indexLastUnderscore), " ");
 				condition = condition.replaceAll(" ", "");
-				condition = condition.replaceAll("\\d+", "");
+				//condition = condition.replaceAll("\\d+", "");
+				System.out.println("CONDITION: " + condition);
 
 				// put the condition in the map
 				if (dataColumnPosition.get(condition) == null) {

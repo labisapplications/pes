@@ -322,10 +322,6 @@ public class StatisticService {
 		toleranceFactor = DataUtil.round(toleranceFactor,2);
 		
 		for (GoTerm goTerm : goTerms) {
-			if(goTerm.getGoAnnotation().getGoId().equals("GO:0005200")) {
-				System.out.println("HERE");
-				
-			}
 
 			for (GoTermCondition goTermCondition : goTerm.getConditions()) {
 				

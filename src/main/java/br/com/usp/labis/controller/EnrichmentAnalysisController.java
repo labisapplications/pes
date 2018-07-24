@@ -42,8 +42,8 @@ public class EnrichmentAnalysisController {
 	@Autowired
 	private OutputService outputService;
 
-	@Autowired
-	private UploadFileService uploadFileService;
+	//@Autowired
+	//private UploadFileService uploadFileService;
 
 	
 	@PostMapping
@@ -52,9 +52,15 @@ public class EnrichmentAnalysisController {
 			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,
 			@RequestParam("toleranceFactor") Double toleranceFactor,
 			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
-
-		String resultFile = enrichmentAnalysisService.processEnrichmentAnalysisToExcel(file, taxonId, minProteins,
+		
+		String resultFile = null;
+		
+		try {
+			resultFile = enrichmentAnalysisService.processEnrichmentAnalysisToExcel(file, taxonId, minProteins,
 				toleranceFactor, nullDistributions, pvalue);
+		} catch (RuntimeException e) {
+			System.out.println("An error occurred: " + e.getMessage() + e.getCause());
+		}
 
 		System.out.println("resultFilePath: " + resultFile);
 
@@ -70,16 +76,22 @@ public class EnrichmentAnalysisController {
 			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,
 			@RequestParam("toleranceFactor") Double toleranceFactor,
 			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
-
-		Map<String, List<Result>> resultMap = enrichmentAnalysisService.processEnrichmentAnalysisToMap(file, taxonId, minProteins,
+		
+		Map<String, List<Result>> resultMap = null;
+		
+		try {
+			resultMap = enrichmentAnalysisService.processEnrichmentAnalysisToMap(file, taxonId, minProteins,
 				toleranceFactor, nullDistributions, pvalue);
-
+		} catch (RuntimeException e) {
+			System.out.println("An error occurred: " + e.getMessage() + e.getCause());
+		}
+		
 		return resultMap;
 	}
 
 
 	@GetMapping("download2")
-	public ResponseEntity<Resource> downloadFile2(@RequestParam("fileName") String fileName) {
+	public ResponseEntity<Resource> downloadFile(@RequestParam("fileName") String fileName) {
 
 		System.out.println("Downloading: " + fileName);
 
@@ -93,34 +105,14 @@ public class EnrichmentAnalysisController {
 		return new ResponseEntity<>(fileSystemResource, headers, HttpStatus.OK);
 	}
 	
-
-	@RequestMapping(value = "download", method = RequestMethod.GET, produces = "application/msexcel")
-	public ResponseEntity<byte[]> downloadFile(@RequestParam("fileName") String fileName) {
-		System.out.println("Downloading: " + fileName);
-
-		Path fileLocation = Paths.get("C:" + File.separator + "uploaded_file" + File.separator + fileName);
-		byte[] data = null;
-		try {
-			data = Files.readAllBytes(fileLocation);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-		headers.add("Pragma", "no-cache");
-		headers.add("Expires", "0");
-		return ResponseEntity.ok().headers(headers).contentLength(data.length)
-				.contentType(MediaType.parseMediaType("application/msexcel"))
-				.body(data);
-	}
-
 	
-	@GetMapping("delete")
+/*	@GetMapping("delete")
 	public void deleteFile(@RequestParam("fileName") String fileName) {
 		File file = outputService.getFileByName(fileName);
 		if (file != null) {
 			uploadFileService.removeUploadedFile(file);
 		}
 	}
+*/
+	
 }

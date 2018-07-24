@@ -1,6 +1,5 @@
 package br.com.usp.labis.service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,8 +34,8 @@ import br.com.usp.labis.useful.GoWorker;
 @Component
 public class EnrichmentAnalysisService {
 
-	@Autowired
-	private UploadFileService uploadFileService;
+	//@Autowired
+	// UploadFileService uploadFileService;
 
 	@Autowired
 	private OutputService outputService;
@@ -97,7 +96,8 @@ public class EnrichmentAnalysisService {
 		List<GoTerm> goTerms = null;
 
 		Double maxStatisticTest = null; //max statistic test between conditions
-
+		
+		/*commented because it will read direct from inputstream without upload the file to some folder
 		// upload of data file to a temporary directory
 		File uploadedFile = uploadFileService.uploadExcelFile(file);
 
@@ -106,6 +106,10 @@ public class EnrichmentAnalysisService {
 
 		// after process the data file, remove it from temporary directory
 		uploadFileService.removeUploadedFile(uploadedFile);
+		*/
+		
+		//reading the file 
+		List<Protein> proteins = excelReaderService.processExcelFile(file);
 
 		// filters to go annotations
 		GoAnnotationFilter filters = new GoAnnotationFilter();
