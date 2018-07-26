@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +22,7 @@ import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 import br.com.usp.labis.bean.Result;
+import br.com.usp.labis.exception.CustomException;
 import br.com.usp.labis.service.file.ExcelReaderService;
 import br.com.usp.labis.service.file.OutputService;
 import br.com.usp.labis.service.file.UploadFileService;
@@ -34,7 +37,7 @@ import br.com.usp.labis.useful.GoWorker;
 @Component
 public class EnrichmentAnalysisService {
 
-	//@Autowired
+	// @Autowired
 	// UploadFileService uploadFileService;
 
 	@Autowired
@@ -54,35 +57,39 @@ public class EnrichmentAnalysisService {
 
 	@Autowired
 	private GoAntologyService goAntologyService;
-	
+
+	@Autowired
+	private MessageSource messageSource;
+
 	public String processEnrichmentAnalysisToExcel(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
-		
+
 		String resultFilePath = "";
-		
-		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm,
-				toleranceFactor, numberOfNullDistributions, pvalue);
-		
+
+		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
+				numberOfNullDistributions, pvalue);
+
 		resultFilePath = outputService.exportToExcel(goTerms);
+
 		System.out.println("exported to excel");
-		
+
 		return resultFilePath;
 	}
-	
-	public Map<String, List<Result>> processEnrichmentAnalysisToMap(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
-			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
-		
-		Map<String, List<Result>> resultMap  = null;
-		
-		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm,
-				toleranceFactor, numberOfNullDistributions, pvalue);
-		
+
+	public Map<String, List<Result>> processEnrichmentAnalysisToMap(MultipartFile file, Integer taxonId,
+			Integer minProteinsPerGoTerm, Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
+
+		Map<String, List<Result>> resultMap = null;
+
+		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
+				numberOfNullDistributions, pvalue);
+
 		resultMap = outputService.exportToMap(goTerms);
-		System.out.println("exported to map");
 		
+		System.out.println("exported to map");
+
 		return resultMap;
 	}
-	
 
 	public List<GoTerm> processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
@@ -92,23 +99,24 @@ public class EnrichmentAnalysisService {
 		Map<String, Double> maxMean = new HashMap<String, Double>();
 
 		Map<String, Double> maxCv = new HashMap<String, Double>();
-		
+
 		List<GoTerm> goTerms = null;
 
-		Double maxStatisticTest = null; //max statistic test between conditions
-		
-		/*commented because it will read direct from inputstream without upload the file to some folder
-		// upload of data file to a temporary directory
-		File uploadedFile = uploadFileService.uploadExcelFile(file);
+		Double maxStatisticTest = null; // max statistic test between conditions
 
-		// process uploaded data file
-		List<Protein> proteins = excelReaderService.processExcelFile(uploadedFile);
+		/*
+		 * commented because it will read direct from inputstream without upload the
+		 * file to some folder // upload of data file to a temporary directory File
+		 * uploadedFile = uploadFileService.uploadExcelFile(file);
+		 * 
+		 * // process uploaded data file List<Protein> proteins =
+		 * excelReaderService.processExcelFile(uploadedFile);
+		 * 
+		 * // after process the data file, remove it from temporary directory
+		 * uploadFileService.removeUploadedFile(uploadedFile);
+		 */
 
-		// after process the data file, remove it from temporary directory
-		uploadFileService.removeUploadedFile(uploadedFile);
-		*/
-		
-		//reading the file 
+		// reading the file
 		List<Protein> proteins = excelReaderService.processExcelFile(file);
 
 		// filters to go annotations
@@ -118,6 +126,11 @@ public class EnrichmentAnalysisService {
 		if (proteins != null && !proteins.isEmpty()) {
 
 			proteins = DataUtil.removeWhatIsNotProteinData(proteins);
+
+			if (proteins == null) {
+				throw new CustomException(
+						messageSource.getMessage("messages.removeWhatIsNotProteinData", new Object[] {}, Locale.US));
+			}
 
 			// get test t or anova for conditions, get max cv, mean and ttest
 			maxStatisticTest = this.getStatistics(proteins, maxMean, maxCv);
@@ -163,6 +176,8 @@ public class EnrichmentAnalysisService {
 			// calc the q value
 			statisticService.calcQValueUsingBenjaminiHochberg(goTerms, pvalue);
 
+		} else {
+			throw new CustomException(messageSource.getMessage("messages.noProteins", new Object[] {}, Locale.US));
 		}
 
 		return goTerms;
@@ -175,29 +190,43 @@ public class EnrichmentAnalysisService {
 		Map<String, List<Double>> conditionsCv = new HashMap<String, List<Double>>();
 
 		List<Double> statisticsTest = new ArrayList<Double>();
+		
 
 		for (Protein protein : proteins) {
+			
+			if(protein.getConditions() == null) {
+				throw new CustomException(messageSource.getMessage("messages.proteinWithoutCondition", 
+						new Object[] { protein.getProteinId()}, Locale.US));
+			} 
 
 			System.out.println("-------------------begin------------------");
 			System.out.println("-PROTEIN => " + protein.getProteinId());
 			System.out.println("-GENE => " + protein.getGeneNames());
 
-			for (Condition condition : protein.getConditions()) {
-				System.out.println("--CONDITION => " + condition.getName());
-				for (Replicate replicate : condition.getReplicates()) {
-					System.out.println("---REPLICATE => " + replicate.getValue());
-
-					if (replicate.getValue() > 0.00) {
+			try {
+				for (Condition condition : protein.getConditions()) {
+					System.out.println("--CONDITION => " + condition.getName());
+					
+					if(condition.getReplicates() == null) {
+						throw new CustomException(messageSource.getMessage("messages.conditionWithoutReplicates", 
+								new Object[] { protein.getProteinId() + " - " + condition.getName()}, Locale.US));
+					} 
+					
+					for (Replicate replicate : condition.getReplicates()) {
 						System.out.println("---REPLICATE => " + replicate.getValue());
 					}
 				}
-			}
 
-			// to calculate the ttest or anova test for protein (considering all conditions)
-			if (protein.getConditions().size() > 2) {
-				protein.setStatisticTest(statisticService.oneWayAnovaTest(protein.getConditions()));
-			} else {
-				protein.setStatisticTest(statisticService.tTest(protein.getConditions()));
+				// to calculate the ttest or anova test for protein (considering all conditions)
+				if (protein.getConditions().size() > 2) {
+					protein.setStatisticTest(statisticService.oneWayAnovaTest(protein.getConditions()));
+				} else {
+					protein.setStatisticTest(statisticService.tTest(protein.getConditions()));
+				}
+				
+			} catch (RuntimeException e) {
+				throw new CustomException(messageSource.getMessage("messages.errorStatisticTest", 
+						new Object[] {e.getMessage() + "- " + e.getCause()}, Locale.US));
 			}
 
 			// calculate mean and cv for each protein condition
@@ -210,9 +239,11 @@ public class EnrichmentAnalysisService {
 		DataUtil.getConditionMeans(proteins, conditionsMean);
 		DataUtil.getProteinsStatisticTest(proteins, statisticsTest);
 
-		statisticService.getMaxMean(conditionsMean, maxMean); //get the max mean per condition
-		statisticService.getMaxCv(conditionsCv, maxCv); //get the max cv per condition
-		Double maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest); //get the max statistic test value (considering all conditions)
+		statisticService.getMaxMean(conditionsMean, maxMean); // get the max mean per condition
+		statisticService.getMaxCv(conditionsCv, maxCv); // get the max cv per condition
+		Double maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest); // get the max statistic test
+																						// value (considering all
+																						// conditions)
 
 		statisticService.calculateProteinWeightForEachCondition(proteins, maxMean, maxCv, maxStatisticTest);
 
@@ -243,10 +274,14 @@ public class EnrichmentAnalysisService {
 				for (String otherProteinId : protein.getOtherProteinsIdAssociated()) {
 
 					if (!protein.getProteinId().equalsIgnoreCase(otherProteinId)) {
+						
 						protein.setProteinId(otherProteinId);
+						
 						System.out.println(
 								"Protein id changed from " + protein.getProteinId() + " to  => " + otherProteinId);
+						
 						System.out.println("Trying to get annotation for protein again => " + protein.getProteinId());
+						
 						this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
 					}
 
@@ -273,7 +308,7 @@ public class EnrichmentAnalysisService {
 		List<GoTerm> listGoTerms = new ArrayList<GoTerm>();
 		Map<String, List<Protein>> goTermWithProteins = new HashMap<String, List<Protein>>();
 		Map<String, GoAnnotation> goAnnotation = new HashMap<String, GoAnnotation>();
-
+		Integer countAnnotationsNotFound = 0;
 		for (Protein protein : proteins) {
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
 				for (GoAnnotation annotation : protein.getGoAnnotations()) {
@@ -285,7 +320,14 @@ public class EnrichmentAnalysisService {
 						goTermWithProteins.get(annotation.getGoId()).add(protein);
 					}
 				}
+			} else {
+				countAnnotationsNotFound += 1;
 			}
+		}
+		
+		if(countAnnotationsNotFound.equals(proteins.size())) {
+			throw new CustomException(
+					messageSource.getMessage("messages.noGoAnnotationsFound", new Object[] {}, Locale.US));
 		}
 
 		Iterator it = goTermWithProteins.entrySet().iterator();
@@ -316,7 +358,6 @@ public class EnrichmentAnalysisService {
 	}
 
 	private void executeGoWorker(Protein protein, GoAnnotationFilter filters, List<GoAnnotation> annotations) {
-
 		// starting threads to speed up the search
 		ExecutorService executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
 		GoWorker worker = null;

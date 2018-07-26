@@ -8,16 +8,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
 import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
+import br.com.usp.labis.exception.CustomException;
 
+@Component
 public class DataUtil {
 	
 	private static final String PROTEIN_IDS = "Protein IDs";
@@ -127,8 +134,13 @@ public class DataUtil {
 	}
 	
 	public static List<Protein> removeWhatIsNotProteinData(List<Protein> proteins) {
-		List<Protein> filteredList = proteins.stream().filter(i -> i.getProteinId() != null && 
+		List<Protein> filteredList = null;
+		try {
+			filteredList = proteins.stream().filter(i -> i.getProteinId() != null && 
 				i.getProteinId() != "" && !i.getProteinId().equalsIgnoreCase(PROTEIN_IDS)).collect(Collectors.toList());
+		} catch (RuntimeException e) {
+			 filteredList = null;
+		}
 		return filteredList;
 	}
 	

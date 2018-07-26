@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -14,12 +15,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
+import br.com.usp.labis.exception.CustomException;
 
 @Component
 public class ExcelReaderService {
@@ -27,6 +31,9 @@ public class ExcelReaderService {
 	private final String PROTEIN_IDS = "Protein IDs";
 	private final String GENE_NAMES = "Gene names";
 	private final String LFQ_INTENSITY = "LFQ intensity";
+	
+	@Autowired
+	private MessageSource messageSource;
 
 	/**
 	 * Process excel data file to extract proteins, conditions and replicates.
@@ -93,6 +100,8 @@ public class ExcelReaderService {
 			e.printStackTrace();
 		} catch (RuntimeException e) {
 			e.printStackTrace();
+				throw new CustomException(messageSource.getMessage("messages.errorProcessExcelFile", 
+						new Object[] {e.getMessage() + "-" + e.getCause()}, Locale.US));
 		} finally {
 			if (workbook != null) {
 				try {
