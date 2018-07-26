@@ -56,16 +56,21 @@ public class EnrichmentAnalysisController {
 
 		String resultFile = null;
 
-		try {
-			resultFile = enrichmentAnalysisService.processEnrichmentAnalysisToExcel(file, taxonId, minProteins,
-					toleranceFactor, nullDistributions, pvalue);
-		} catch (RuntimeException e) {
-			System.out.println("An error occurred: " + e.getMessage() + e.getCause());
+		resultFile = enrichmentAnalysisService.processEnrichmentAnalysisToExcel(file, taxonId, minProteins,
+				toleranceFactor, nullDistributions, pvalue);
+
+		if (resultFile == null) {
+			throw new CustomException(messageSource.getMessage("messages.errorAnalysis", new Object[] {}, Locale.US));
 		}
 
 		System.out.println("resultFilePath: " + resultFile);
 
 		File fileOutput = new File(resultFile);
+		
+		if (fileOutput == null) {
+			throw new CustomException(messageSource.getMessage("messages.errorFileOutput", new Object[] {}, Locale.US));
+		}
+		
 		resultFile = fileOutput != null ? fileOutput.getName() : null;
 
 		return resultFile;
@@ -78,10 +83,12 @@ public class EnrichmentAnalysisController {
 			@RequestParam("toleranceFactor") Double toleranceFactor,
 			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
 
-		Map<String, List<Result>> resultMap = null;
+		Map<String, List<Result>> resultMap = enrichmentAnalysisService.processEnrichmentAnalysisToMap(file, taxonId,
+				minProteins, toleranceFactor, nullDistributions, pvalue);
 
-		 resultMap = enrichmentAnalysisService.processEnrichmentAnalysisToMap(file,
-		 taxonId, minProteins, toleranceFactor, nullDistributions, pvalue);
+		if (resultMap == null) {
+			throw new CustomException(messageSource.getMessage("messages.errorAnalysis", new Object[] {}, Locale.US));
+		}
 
 		return resultMap;
 	}
@@ -92,11 +99,15 @@ public class EnrichmentAnalysisController {
 		System.out.println("Downloading: " + fileName);
 
 		File fileOutput = outputService.getFileByName(fileName);
-
+		
+		if (fileOutput == null) {
+			throw new CustomException(messageSource.getMessage("messages.errorFileOutput", new Object[] {}, Locale.US));
+		}
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
-		FileSystemResource fileSystemResource = fileOutput != null ? new FileSystemResource(fileOutput) : null;
+		FileSystemResource fileSystemResource = new FileSystemResource(fileOutput) ;
 
 		return new ResponseEntity<>(fileSystemResource, headers, HttpStatus.OK);
 	}
