@@ -3,11 +3,13 @@ br\com\usp\labis\bean\Condition.class
 br\com\usp\labis\bean\GeneProduct.class
 br\com\usp\labis\enums\GeneProductDatabaseEnum.class
 br\com\usp\labis\bean\Replicate.class
+br\com\usp\labis\exception\ApiErrorResponse.class
 br\com\usp\labis\bean\GoAntology.class
 br\com\usp\labis\main\PesApplication.class
 br\com\usp\labis\bean\GoAntologyChild.class
 br\com\usp\labis\bean\WithFrom.class
 br\com\usp\labis\useful\GoAnnotationFilter.class
+br\com\usp\labis\exception\CustomException.class
 br\com\usp\labis\enums\GoEvidenceEnum.class
 br\com\usp\labis\service\go\GoAntologyService.class
 br\com\usp\labis\service\file\ExcelReaderService.class

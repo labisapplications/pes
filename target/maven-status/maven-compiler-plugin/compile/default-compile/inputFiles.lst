@@ -14,6 +14,7 @@ C:\workspace\pes\src\main\java\br\com\usp\labis\service\file\ExcelReaderService.
 C:\workspace\pes\src\main\java\br\com\usp\labis\enums\GeneProductDatabaseEnum.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\service\statistic\StatisticService.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\bean\GoTermCondition.java
+C:\workspace\pes\src\main\java\br\com\usp\labis\exception\CustomException.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\service\file\OutputService.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\bean\GoAnnotation.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\bean\GoAntology.java
@@ -29,6 +30,7 @@ C:\workspace\pes\src\main\java\br\com\usp\labis\bean\GeneProduct.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\enums\GoEvidenceEnum.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\main\PesApplication.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\enums\GoAspectEnum.java
+C:\workspace\pes\src\main\java\br\com\usp\labis\exception\ApiErrorResponse.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\bean\Replicate.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\service\go\CoreService.java
 C:\workspace\pes\src\main\java\br\com\usp\labis\bean\WithFrom.java

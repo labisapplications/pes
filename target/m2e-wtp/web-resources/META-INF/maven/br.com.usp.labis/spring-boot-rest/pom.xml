@@ -63,7 +63,7 @@
 		</dependency>
 		
 		<!-- DEPLOY ON WILDFLY BEGIN --> 
-    	<!-- <dependency>
+    	 <dependency>
       		<groupId>org.springframework.boot</groupId>
       			<artifactId>spring-boot-starter-web</artifactId>
      			 <exclusions>
@@ -73,9 +73,9 @@
         			</exclusion>
      			 </exclusions>
     	</dependency>
-  -->
+
     	<!-- We need to include the javax.servlet API specs, the implementation will be provided by Wildfly / JBoss-->
-    	<!--  
+
     	<dependency>
      	 	<groupId>javax.servlet</groupId>
       		<artifactId>javax.servlet-api</artifactId>
@@ -93,7 +93,7 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		-->
+
 			<!--  DEPLOY ON WILDFLY END --> 
 	
 	</dependencies>
