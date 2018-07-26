@@ -59,10 +59,6 @@ public class EnrichmentAnalysisController {
 		resultFile = enrichmentAnalysisService.processEnrichmentAnalysisToExcel(file, taxonId, minProteins,
 				toleranceFactor, nullDistributions, pvalue);
 
-		if (resultFile == null) {
-			throw new CustomException(messageSource.getMessage("messages.errorAnalysis", new Object[] {}, Locale.US));
-		}
-
 		System.out.println("resultFilePath: " + resultFile);
 
 		File fileOutput = new File(resultFile);

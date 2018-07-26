@@ -66,12 +66,20 @@ public class EnrichmentAnalysisService {
 
 		String resultFilePath = "";
 
-		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
-				numberOfNullDistributions, pvalue);
+		List<GoTerm> goTerms = null;
 
-		resultFilePath = outputService.exportToExcel(goTerms);
+		try {
+			goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
+					numberOfNullDistributions, pvalue);
 
-		System.out.println("exported to excel");
+			resultFilePath = outputService.exportToExcel(goTerms);
+
+			System.out.println("exported to excel");
+
+		} catch (RuntimeException e) {
+			throw new CustomException(messageSource.getMessage("messages.errorAnalysis",
+					new Object[] { e.getMessage() + " -  " + e.getCause() }, Locale.US));
+		}
 
 		return resultFilePath;
 	}
@@ -81,13 +89,21 @@ public class EnrichmentAnalysisService {
 
 		Map<String, List<Result>> resultMap = null;
 
-		List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
-				numberOfNullDistributions, pvalue);
-
-		resultMap = outputService.exportToMap(goTerms);
+		List<GoTerm> goTerms = null;
 		
-		System.out.println("exported to map");
+		try {
+			goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
+					numberOfNullDistributions, pvalue);
 
+			resultMap = outputService.exportToMap(goTerms);
+
+			System.out.println("exported to map");
+			
+		} catch (RuntimeException e) {
+			throw new CustomException(messageSource.getMessage("messages.errorAnalysis",
+					new Object[] { e.getMessage() + " -  " + e.getCause() }, Locale.US));
+		}
+		
 		return resultMap;
 	}
 
@@ -190,14 +206,13 @@ public class EnrichmentAnalysisService {
 		Map<String, List<Double>> conditionsCv = new HashMap<String, List<Double>>();
 
 		List<Double> statisticsTest = new ArrayList<Double>();
-		
 
 		for (Protein protein : proteins) {
-			
-			if(protein.getConditions() == null) {
-				throw new CustomException(messageSource.getMessage("messages.proteinWithoutCondition", 
-						new Object[] { protein.getProteinId()}, Locale.US));
-			} 
+
+			if (protein.getConditions() == null) {
+				throw new CustomException(messageSource.getMessage("messages.proteinWithoutCondition",
+						new Object[] { protein.getProteinId() }, Locale.US));
+			}
 
 			System.out.println("-------------------begin------------------");
 			System.out.println("-PROTEIN => " + protein.getProteinId());
@@ -206,12 +221,12 @@ public class EnrichmentAnalysisService {
 			try {
 				for (Condition condition : protein.getConditions()) {
 					System.out.println("--CONDITION => " + condition.getName());
-					
-					if(condition.getReplicates() == null) {
-						throw new CustomException(messageSource.getMessage("messages.conditionWithoutReplicates", 
-								new Object[] { protein.getProteinId() + " - " + condition.getName()}, Locale.US));
-					} 
-					
+
+					if (condition.getReplicates() == null) {
+						throw new CustomException(messageSource.getMessage("messages.conditionWithoutReplicates",
+								new Object[] { protein.getProteinId() + " - " + condition.getName() }, Locale.US));
+					}
+
 					for (Replicate replicate : condition.getReplicates()) {
 						System.out.println("---REPLICATE => " + replicate.getValue());
 					}
@@ -223,10 +238,10 @@ public class EnrichmentAnalysisService {
 				} else {
 					protein.setStatisticTest(statisticService.tTest(protein.getConditions()));
 				}
-				
+
 			} catch (RuntimeException e) {
-				throw new CustomException(messageSource.getMessage("messages.errorStatisticTest", 
-						new Object[] {e.getMessage() + "- " + e.getCause()}, Locale.US));
+				throw new CustomException(messageSource.getMessage("messages.errorStatisticTest",
+						new Object[] { e.getMessage() + "- " + e.getCause() }, Locale.US));
 			}
 
 			// calculate mean and cv for each protein condition
@@ -274,14 +289,14 @@ public class EnrichmentAnalysisService {
 				for (String otherProteinId : protein.getOtherProteinsIdAssociated()) {
 
 					if (!protein.getProteinId().equalsIgnoreCase(otherProteinId)) {
-						
+
 						protein.setProteinId(otherProteinId);
-						
+
 						System.out.println(
 								"Protein id changed from " + protein.getProteinId() + " to  => " + otherProteinId);
-						
+
 						System.out.println("Trying to get annotation for protein again => " + protein.getProteinId());
-						
+
 						this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
 					}
 
@@ -324,8 +339,8 @@ public class EnrichmentAnalysisService {
 				countAnnotationsNotFound += 1;
 			}
 		}
-		
-		if(countAnnotationsNotFound.equals(proteins.size())) {
+
+		if (countAnnotationsNotFound.equals(proteins.size())) {
 			throw new CustomException(
 					messageSource.getMessage("messages.noGoAnnotationsFound", new Object[] {}, Locale.US));
 		}
