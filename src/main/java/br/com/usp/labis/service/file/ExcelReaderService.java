@@ -31,7 +31,7 @@ public class ExcelReaderService {
 	private final String PROTEIN_IDS = "Protein IDs";
 	private final String GENE_NAMES = "Gene names";
 	private final String LFQ_INTENSITY = "LFQ intensity";
-	
+
 	@Autowired
 	private MessageSource messageSource;
 
@@ -42,14 +42,14 @@ public class ExcelReaderService {
 	 *            data file to be processed
 	 * @return List<Protein> protein list
 	 */
-	//public List<Protein> processExcelFile(File file) {
+	// public List<Protein> processExcelFile(File file) {
 	public List<Protein> processExcelFile(MultipartFile file) {
 		Workbook workbook = null;
 		List<Protein> proteins = new ArrayList<Protein>();
 
 		try {
-			//FileInputStream excelFile = new FileInputStream(file);
-			//workbook = new XSSFWorkbook(excelFile);
+			// FileInputStream excelFile = new FileInputStream(file);
+			// workbook = new XSSFWorkbook(excelFile);
 			workbook = new XSSFWorkbook(file.getInputStream());
 			Sheet datatypeSheet = workbook.getSheetAt(0);
 			Iterator<Row> iterator = datatypeSheet.iterator();
@@ -100,8 +100,8 @@ public class ExcelReaderService {
 			e.printStackTrace();
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-				throw new CustomException(messageSource.getMessage("messages.errorProcessExcelFile", 
-						new Object[] {e.getMessage() + "-" + e.getCause()}, Locale.US));
+			throw new CustomException(messageSource.getMessage("messages.errorProcessExcelFile",
+					new Object[] { e.getMessage() + "-" + e.getCause() }, Locale.US));
 		} finally {
 			if (workbook != null) {
 				try {
@@ -141,10 +141,10 @@ public class ExcelReaderService {
 
 			} else if (columnNumber == 2 && !isMajorityProteinNamePresent) {
 				rows.get(key).add(" ");
-				
+
 			} else if (columnNumber == 3 && !isProteinNamePresent) {
 				rows.get(key).add(" ");
-				
+
 			} else if (columnNumber == 4 && !isGeneNamePresent) {
 				rows.get(key).add(" ");
 			}
@@ -243,9 +243,18 @@ public class ExcelReaderService {
 				replicate.setName(conditionReplicates.getKey() + "_" + replicatePositions.get(index));
 
 				try {
+					//try get as numeric value
 					replicate.setValue((Double) rowColumns.get(replicatePositions.get(index)));
+					
 				} catch (RuntimeException e) {
-					replicate.setValue(0.00);
+					//try get as string
+					try {
+						if(replicate.getValue() == null) {	
+							replicate.setValue((Double) Double.parseDouble((String) rowColumns.get(replicatePositions.get(index))));
+						}
+					} catch (Exception e2) {
+						replicate.setValue(0.00);
+					}
 				}
 				condition.getReplicates().add(replicate);
 			}
@@ -298,17 +307,17 @@ public class ExcelReaderService {
 	private Map<String, List<Integer>> getConditionsAndReplicates(Map<String, List<Object>> rows) {
 		Map<String, List<Integer>> dataColumnPosition = new HashMap<String, List<Integer>>();
 		List<Object> columns = rows.get(PROTEIN_IDS);
-		
+
 		for (int index = 0; index < columns.size(); index++) {
 			String column = (String) columns.get(index);
-			
+
 			if (column.contains(LFQ_INTENSITY)) {
 				// get the condition name. Expected format: LFQ_INTENSITY Condition_Replicate
 				String condition = column.replaceAll(LFQ_INTENSITY, "");
 				Integer indexLastUnderscore = column.lastIndexOf("_");
 				condition = condition.replaceAll(column.substring(indexLastUnderscore), " ");
 				condition = condition.replaceAll(" ", "");
-				//condition = condition.replaceAll("\\d+", "");
+				// condition = condition.replaceAll("\\d+", "");
 				System.out.println("CONDITION: " + condition);
 
 				// put the condition in the map

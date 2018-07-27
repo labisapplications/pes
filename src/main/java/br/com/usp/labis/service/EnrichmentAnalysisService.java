@@ -25,7 +25,6 @@ import br.com.usp.labis.bean.Result;
 import br.com.usp.labis.exception.CustomException;
 import br.com.usp.labis.service.file.ExcelReaderService;
 import br.com.usp.labis.service.file.OutputService;
-import br.com.usp.labis.service.file.UploadFileService;
 import br.com.usp.labis.service.go.GeneProductService;
 import br.com.usp.labis.service.go.GoAnnotationService;
 import br.com.usp.labis.service.go.GoAntologyService;
@@ -33,6 +32,7 @@ import br.com.usp.labis.service.statistic.StatisticService;
 import br.com.usp.labis.useful.DataUtil;
 import br.com.usp.labis.useful.GoAnnotationFilter;
 import br.com.usp.labis.useful.GoWorker;
+import br.com.usp.labis.useful.GoWorkerCoreParams;
 
 @Component
 public class EnrichmentAnalysisService {
@@ -186,8 +186,25 @@ public class EnrichmentAnalysisService {
 
 			// get the core proteins for each go term
 			System.out.println("Getting the core proteins");
-			statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
-					toleranceFactor, pvalue, proteins);
+			//statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
+			//		toleranceFactor, pvalue, proteins);
+			
+			GoWorkerCoreParams goWorkerCoreParams = new GoWorkerCoreParams();
+			
+			goWorkerCoreParams.setGoTerms(goTerms);
+			goWorkerCoreParams.setMaxCv(maxCv);
+			goWorkerCoreParams.setMaxMean(maxMean);
+			goWorkerCoreParams.setMaxStatisticTest(maxStatisticTest);
+			goWorkerCoreParams.setNumberOfNullDistributions(numberOfNullDistributions);
+			goWorkerCoreParams.setProteinsOriginal(proteins);
+			goWorkerCoreParams.setPvalueDesired(pvalue);
+			goWorkerCoreParams.setToleranceFactor(toleranceFactor);
+			
+			System.out.println("Go Terms size:" + goTerms.size());
+			
+			for (GoTerm goTerm : goTerms ) {
+				this.executeGoWorker(null, null,null, goTerm, goWorkerCoreParams);
+			}
 
 			// calc the q value
 			statisticService.calcQValueUsingBenjaminiHochberg(goTerms, pvalue);
@@ -269,6 +286,7 @@ public class EnrichmentAnalysisService {
 			List<Protein> proteinsAnnotationNotFound) {
 
 		for (Protein protein : proteins) {
+			System.out.println("Searching for annotations => Protein: " + protein.getProteinId());
 			this.executeGoWorker(protein, filters, null);
 		}
 
@@ -371,15 +389,27 @@ public class EnrichmentAnalysisService {
 		}
 		System.out.println("The search for antology is ended!!!");
 	}
-
+	
 	private void executeGoWorker(Protein protein, GoAnnotationFilter filters, List<GoAnnotation> annotations) {
+		this.executeGoWorker(protein, filters, annotations, null, null);
+	}
+
+	private void executeGoWorker(Protein protein, GoAnnotationFilter filters, List<GoAnnotation> annotations, GoTerm goTerm, GoWorkerCoreParams goWorkerCoreParams) {
+		
 		// starting threads to speed up the search
 		ExecutorService executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
 		GoWorker worker = null;
 
 		if (annotations != null) {
+			
 			worker = new GoWorker(annotations, goAntologyService);
+			
+		} else if (goTerm != null && goWorkerCoreParams != null ) {
+			
+			worker = new GoWorker(goTerm, goWorkerCoreParams, statisticService);
+			
 		} else {
+			
 			worker = new GoWorker(protein, goAnnotationService, filters);
 		}
 

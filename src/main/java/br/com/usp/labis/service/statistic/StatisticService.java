@@ -511,6 +511,158 @@ public class StatisticService {
 			}
 		}
 	}
+	
+	public void getCoreProteinsForGoTerm(GoTerm goTerm, Map<String, Double> maxMean, Map<String, Double> maxCv,
+			Double maxStatisticTest, Integer numberOfNullDistributions, Double toleranceFactor, Double pvalueDesired,
+			List<Protein> proteinsOriginal) {
+
+		pvalueDesired = DataUtil.round(pvalueDesired, 2);
+		
+		toleranceFactor = DataUtil.round(toleranceFactor, 2);
+
+		System.out.println("getCoreProteinsForGoTerm : " + goTerm.getGoAnnotation().getGoId());
+		
+		//for (GoTerm goTerm : goTerms) {
+
+			for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+
+				// try to improve the pvalue if the calculated pvalue is higher than the desired
+				// and exists more than one protein in the protein set
+				if (goTermCondition.getPvalueOriginal() > pvalueDesired
+						&& goTermCondition.getOriginalProteins().size() > 1 ) {
+
+					List<Protein> originalProteins = goTermCondition.getOriginalProteins();
+
+					Double pvalueToCompare = goTermCondition.getPvalueOriginal();
+
+					// order the proteins by weight in ascending order
+					List<Protein> originalProteinsOrdered = DataUtil.orderProteinConditionWeightAsc(originalProteins,
+							goTermCondition.getCondition());
+
+					// first: consider that the final pvalue and final weight are like the original
+					// ones
+					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
+					
+					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
+
+					// for each protein
+					for (Protein originaProt : originalProteinsOrdered) {
+
+						// get a list without the protein to see if pvalue will get better without it
+						List<Protein> core = originalProteinsOrdered.stream()
+								.filter(i -> i.getProteinId() != originaProt.getProteinId())
+								.collect(Collectors.toList());
+
+						List<Double> means = new ArrayList<Double>();
+						
+						List<Double> weights = new ArrayList<Double>();
+
+						// calculate the mean, weight and cv without the protein
+						for (Protein coreProt : core) {
+							for (Condition coreProtCond : coreProt.getConditions()) {
+								if (coreProtCond.getName().equals(goTermCondition.getCondition().getName())) {
+									
+									means.add(coreProtCond.getMean());
+									
+									weights.add(coreProtCond.getWeight());
+								}
+							}
+						}
+
+						Double cv = this.calcCv(means);
+
+						Double weightSum = 0.00;
+						
+						for (Double weight : weights) {
+							
+							weightSum += weight;
+						}
+
+						goTermCondition.setCoreCv(cv);
+						
+						goTermCondition.setCoreWeight(DataUtil.round(weightSum, 2));
+						
+						goTermCondition.setCoreProteins(core);
+
+						// calc the null distribution and the core pvalue to this core protein set
+						List<GoTerm> goTermToGetNullDistributions = new ArrayList<GoTerm>();
+						
+						goTermToGetNullDistributions.add(goTerm);
+
+						this.getNullDistributions(numberOfNullDistributions, toleranceFactor,
+								goTermToGetNullDistributions, goTermCondition.getCondition().getName(),
+								proteinsOriginal, true);
+
+						this.calcNullDistributionPvalues(goTermToGetNullDistributions, pvalueDesired, true);
+
+						/*
+						 * pvalue = goTermCondition.getPvalueOriginal();
+						 * 
+						 * //if the pvalue did not improve, stop if (goTermCondition.getPvalueCore() >=
+						 * pvalue) { goTermCondition.setCoreProteins(core); break; }
+						 * 
+						 * //continue until get a good pvalue or until exists just one protein in the
+						 * set pvalue = goTermCondition.getPvalueCore();
+						 * goTermCondition.setFinalPvalue(pvalue);
+						 * goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+						 * originalProteinsOrdered = core;
+						 */
+
+						// if the pvalue was improved, stop because the goal was achieved!
+						if (goTermCondition.getPvalueCore().compareTo(pvalueToCompare) < 0
+								&& (goTermCondition.getPvalueCore().compareTo(pvalueDesired) == 0
+										|| goTermCondition.getPvalueCore().compareTo(pvalueDesired) < 0)) {
+							
+							goTermCondition.setCoreProteins(core);
+							
+							goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
+							
+							goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+							
+							break;
+						}
+
+						// else continue until get a good core pvalue or until exists just one protein
+						// in the set
+						pvalueToCompare = goTermCondition.getPvalueCore();
+						originalProteinsOrdered = core;
+
+						if (originalProteinsOrdered.size() == 1) {
+							
+							// if after all the pvalue did not improve, then consider the original values
+							if (goTermCondition.getPvalueCore().compareTo(goTermCondition.getPvalueOriginal()) == 0
+									|| goTermCondition.getPvalueCore()
+											.compareTo(goTermCondition.getPvalueOriginal()) > 0) {
+								
+								goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
+								
+								goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
+								
+								goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
+								
+							} else {
+								
+								goTermCondition.setCoreProteins(core);
+								
+								goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
+								
+								goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+							}
+							break;
+						}
+					}
+
+				} else {
+
+					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
+					
+					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
+					
+					goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
+				}
+			}
+		//}
+	}
 
 	public void calcNullDistributionPvalues(List<GoTerm> goTerms, Double pvalue, Boolean isCore) {
 
