@@ -6,7 +6,7 @@ import java.util.Map;
 import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.Protein;
 
-public class GoWorkerCoreParams {
+public class GoCoreParams {
 
 	private List<GoTerm> goTerms;
 	private Map<String, Double> maxMean;

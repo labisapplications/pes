@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,7 @@ import br.com.usp.labis.service.go.GoAntologyService;
 import br.com.usp.labis.service.statistic.StatisticService;
 import br.com.usp.labis.useful.DataUtil;
 import br.com.usp.labis.useful.GoAnnotationFilter;
-import br.com.usp.labis.useful.GoWorker;
-import br.com.usp.labis.useful.GoWorkerCoreParams;
+import br.com.usp.labis.useful.GoCoreParams;
 
 @Component
 public class EnrichmentAnalysisService {
@@ -72,6 +71,8 @@ public class EnrichmentAnalysisService {
 			goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
 					numberOfNullDistributions, pvalue);
 
+			System.out.println("exporting to excel ...");
+
 			resultFilePath = outputService.exportToExcel(goTerms);
 
 			System.out.println("exported to excel");
@@ -90,7 +91,7 @@ public class EnrichmentAnalysisService {
 		Map<String, List<Result>> resultMap = null;
 
 		List<GoTerm> goTerms = null;
-		
+
 		try {
 			goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
 					numberOfNullDistributions, pvalue);
@@ -98,12 +99,12 @@ public class EnrichmentAnalysisService {
 			resultMap = outputService.exportToMap(goTerms);
 
 			System.out.println("exported to map");
-			
+
 		} catch (RuntimeException e) {
 			throw new CustomException(messageSource.getMessage("messages.errorAnalysis",
 					new Object[] { e.getMessage() + " -  " + e.getCause() }, Locale.US));
 		}
-		
+
 		return resultMap;
 	}
 
@@ -185,26 +186,23 @@ public class EnrichmentAnalysisService {
 			statisticService.calcNullDistributionPvalues(goTerms, pvalue, false);
 
 			// get the core proteins for each go term
-			System.out.println("Getting the core proteins");
-			//statisticService.getCoreProteins(goTerms, maxMean, maxCv, maxStatisticTest, numberOfNullDistributions,
-			//		toleranceFactor, pvalue, proteins);
-			
-			GoWorkerCoreParams goWorkerCoreParams = new GoWorkerCoreParams();
-			
-			goWorkerCoreParams.setGoTerms(goTerms);
-			goWorkerCoreParams.setMaxCv(maxCv);
-			goWorkerCoreParams.setMaxMean(maxMean);
-			goWorkerCoreParams.setMaxStatisticTest(maxStatisticTest);
-			goWorkerCoreParams.setNumberOfNullDistributions(numberOfNullDistributions);
-			goWorkerCoreParams.setProteinsOriginal(proteins);
-			goWorkerCoreParams.setPvalueDesired(pvalue);
-			goWorkerCoreParams.setToleranceFactor(toleranceFactor);
-			
 			System.out.println("Go Terms size:" + goTerms.size());
+			System.out.println("Getting the core proteins");
+
+			GoCoreParams goCoreParams = new GoCoreParams();
+			goCoreParams.setGoTerms(goTerms);
+			goCoreParams.setMaxCv(maxCv);
+			goCoreParams.setMaxMean(maxMean);
+			goCoreParams.setMaxStatisticTest(maxStatisticTest);
+			goCoreParams.setNumberOfNullDistributions(numberOfNullDistributions);
+			goCoreParams.setProteinsOriginal(proteins);
+			goCoreParams.setPvalueDesired(pvalue);
+			goCoreParams.setToleranceFactor(toleranceFactor);
 			
-			for (GoTerm goTerm : goTerms ) {
-				this.executeGoWorker(null, null,null, goTerm, goWorkerCoreParams);
-			}
+			this.calcCoreProtein(goCoreParams) ;
+
+			// calc the ratio between the conditions
+			statisticService.calcRatioBetweenConditions(goTerms, numberOfNullDistributions);
 
 			// calc the q value
 			statisticService.calcQValueUsingBenjaminiHochberg(goTerms, pvalue);
@@ -285,15 +283,19 @@ public class EnrichmentAnalysisService {
 	private void getAnnotationsForProteins(List<Protein> proteins, GoAnnotationFilter filters,
 			List<Protein> proteinsAnnotationNotFound) {
 
-		for (Protein protein : proteins) {
+		/*for (Protein protein : proteins) {
 			System.out.println("Searching for annotations => Protein: " + protein.getProteinId());
 			this.executeGoWorker(protein, filters, null);
-		}
+		}*/
+		
+		this.getGoAnnotationsForEachProtein(proteins,  filters) ;
 
 		// try again
 		for (Protein protein : proteins) {
+			
 			// if some protein is without annotations try again
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
+				
 				System.out.println("Trying to get annotation for protein again: " + protein.getProteinId());
 				this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
 			}
@@ -301,9 +303,11 @@ public class EnrichmentAnalysisService {
 
 		// try a second protein id (if exists)
 		for (Protein protein : proteins) {
+			
 			if ((protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty())
 					&& protein.getOtherProteinsIdAssociated() != null
 					&& !protein.getOtherProteinsIdAssociated().isEmpty()) {
+				
 				for (String otherProteinId : protein.getOtherProteinsIdAssociated()) {
 
 					if (!protein.getProteinId().equalsIgnoreCase(otherProteinId)) {
@@ -328,11 +332,14 @@ public class EnrichmentAnalysisService {
 
 		// give up
 		for (Protein protein : proteins) {
+			
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
+				
 				System.out.println("Could not get annotation for => " + protein.getProteinId());
 				proteinsAnnotationNotFound.add(protein);
 			}
 		}
+		
 		System.out.println("The search for annotations is ended!!!");
 	}
 
@@ -381,46 +388,78 @@ public class EnrichmentAnalysisService {
 		return listGoTerms;
 	}
 
-	private void getGoAntologyForAnnotations(List<Protein> proteins) {
-		for (Protein protein : proteins) {
-			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
-				this.executeGoWorker(null, null, protein.getGoAnnotations());
-			}
-		}
-		System.out.println("The search for antology is ended!!!");
-	}
 	
-	private void executeGoWorker(Protein protein, GoAnnotationFilter filters, List<GoAnnotation> annotations) {
-		this.executeGoWorker(protein, filters, annotations, null, null);
-	}
+	private void getGoAnnotationsForEachProtein(List<Protein> proteins, GoAnnotationFilter filters) {
 
-	private void executeGoWorker(Protein protein, GoAnnotationFilter filters, List<GoAnnotation> annotations, GoTerm goTerm, GoWorkerCoreParams goWorkerCoreParams) {
-		
-		// starting threads to speed up the search
-		ExecutorService executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
-		GoWorker worker = null;
+		System.out.println("##### calcCoreProtein #######");
 
-		if (annotations != null) {
-			
-			worker = new GoWorker(annotations, goAntologyService);
-			
-		} else if (goTerm != null && goWorkerCoreParams != null ) {
-			
-			worker = new GoWorker(goTerm, goWorkerCoreParams, statisticService);
-			
-		} else {
-			
-			worker = new GoWorker(protein, goAnnotationService, filters);
+		List<Runnable> tasks = new ArrayList<Runnable>();
+
+		for (Protein protein : proteins) {
+			Runnable runnable = () -> {
+				try {
+					
+					goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
+					
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+				}
+			};
+			tasks.add(runnable);
 		}
 
-		executor.execute(worker);
+		ExecutorService es = Executors.newFixedThreadPool(2);
 
+		CompletableFuture<?>[] futures = tasks.stream().map(task -> CompletableFuture.runAsync(task, es))
+				.toArray(CompletableFuture[]::new);
+		CompletableFuture.allOf(futures).join();
+		es.shutdown();
+		
 		try {
-			executor.shutdown();
-			executor.awaitTermination(15, TimeUnit.SECONDS);
+
+			es.awaitTermination(600, TimeUnit.SECONDS);
 
 		} catch (InterruptedException e) {
-			executor.shutdownNow();
+			
+			es.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void calcCoreProtein(GoCoreParams goWorkerCoreParams) {
+
+		System.out.println("##### calcCoreProtein #######");
+
+		List<Runnable> tasks = new ArrayList<Runnable>();
+
+		for (GoTerm goTerm : goWorkerCoreParams.getGoTerms()) {
+			Runnable runnable = () -> {
+				try {
+					statisticService.getCoreProteinsForGoTerm(goTerm, goWorkerCoreParams.getMaxMean(),
+							goWorkerCoreParams.getMaxCv(), goWorkerCoreParams.getMaxStatisticTest(),
+							goWorkerCoreParams.getNumberOfNullDistributions(), goWorkerCoreParams.getToleranceFactor(),
+							goWorkerCoreParams.getPvalueDesired(), goWorkerCoreParams.getProteinsOriginal());
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+				}
+			};
+			tasks.add(runnable);
+		}
+
+		ExecutorService es = Executors.newFixedThreadPool(5);
+
+		CompletableFuture<?>[] futures = tasks.stream().map(task -> CompletableFuture.runAsync(task, es))
+				.toArray(CompletableFuture[]::new);
+		CompletableFuture.allOf(futures).join();
+		es.shutdown();
+		
+		try {
+
+			es.awaitTermination(600, TimeUnit.SECONDS);
+
+		} catch (InterruptedException e) {
+			
+			es.shutdownNow();
 			Thread.currentThread().interrupt();
 		}
 	}

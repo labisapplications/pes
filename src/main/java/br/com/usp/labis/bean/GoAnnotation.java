@@ -1,5 +1,6 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -13,34 +14,34 @@ import br.com.usp.labis.enums.GoEvidenceEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
-public class GoAnnotation {
+public class GoAnnotation implements Serializable {
 	
 	@JsonProperty
-	String id;
+	private String id;
 	
 	@JsonProperty
-	String geneProductId;
+	private String geneProductId;
 	
 	@JsonProperty
-	String qualifier;
+	private String qualifier;
 	
 	@JsonProperty
-	GoAspectEnum goAspect;
+	private GoAspectEnum goAspect;
 	
 	@JsonProperty
-	GoEvidenceEnum goEvidence;
+	private GoEvidenceEnum goEvidence;
 	
 	@JsonProperty
-	String goId;
+	private String goId;
 	
 	@JsonProperty
-	String goName;
+	private String goName;
 	
 	@JsonProperty
-	Integer taxonId;
+	private Integer taxonId;
 	
 	@JsonProperty
-	String symbol;
+	private String symbol;
 	
 	/*@JsonProperty
 	List<Extension> extensions;

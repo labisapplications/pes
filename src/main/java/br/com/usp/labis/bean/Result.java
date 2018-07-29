@@ -1,16 +1,24 @@
 package br.com.usp.labis.bean;
 
-public class Result {
-	String conditionName;
-	String goId;
-	String geneName;
-	String qualifier;
-	String aspect;
-	String pvalue;
-	String qvalue;
-	String rank;
-	String core;
-	String weight;
+import java.io.Serializable;
+
+public class Result implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
+	private String conditionName;
+	private String goId;
+	private String geneName;
+	private String goName;
+	private String qualifier;
+	private String aspect;
+	private String pvalue;
+	private String qvalue;
+	private String rank;
+	private String core;
+	private String weight;
+	private String ratioAB;
+	
 	public String getConditionName() {
 		return conditionName;
 	}
@@ -70,6 +78,19 @@ public class Result {
 	}
 	public void setWeight(String weight) {
 		this.weight = weight;
+	}
+	
+	public String getGoName() {
+		return goName;
+	}
+	public void setGoName(String goName) {
+		this.goName = goName;
+	}
+	public String getRatioAB() {
+		return ratioAB;
+	}
+	public void setRatioAB(String ratioAB) {
+		this.ratioAB = ratioAB;
 	}
 	@Override
 	public int hashCode() {

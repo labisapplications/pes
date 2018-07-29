@@ -1,5 +1,6 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,31 +9,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import br.com.usp.labis.enums.GeneProductDatabaseEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GeneProduct {
+public class GeneProduct implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 
 	@JsonProperty
-	GeneProductDatabaseEnum database;
+	private GeneProductDatabaseEnum database;
 	
 	@JsonProperty
-	String id;
+	private String id;
 	
 	@JsonProperty
-	String symbol;
+	private String symbol;
 	
 	@JsonProperty
-	String name;
+	private String name;
 	
 	//@JsonProperty
 	//List<String> synonyms;
 	
 	@JsonProperty
-	String type;
+	private String type;
 	
 	@JsonProperty
-	Integer taxonId;
+	private Integer taxonId;
 	
 	@JsonProperty
-	String databaseSubset;
+	private String databaseSubset;
 
 	public GeneProductDatabaseEnum getDatabase() {
 		return database;

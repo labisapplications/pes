@@ -26,21 +26,29 @@ public class OutputService {
 
 	private final String FILE_EXTENSION = ".XLS";
 
-	private static String[] COLUMNS = { "GO_ID", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE", "QVALUE", "RANK", "WEIGHT",
+	private static String[] COLUMNS = { "GO_ID", "GO_NAME", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE_RATIO_A_B", "PVALUE", "QVALUE", "RANK", "WEIGHT",
 			"CORE", "ORIGINAL_WEIGHT", "ORIGINAL_PVALUE", "ORIGINAL_PROTEINS" };
 
 	public String exportToExcel(List<GoTerm> goTerms) {
 
-		String filePath = UPLOADED_FOLDER + "result" + System.currentTimeMillis() + FILE_EXTENSION;
+		String filePath = null;
+		
+		String conditionsNames = "";
 
 		Workbook workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
 
 		for (GoTermCondition goTermCondition : goTerms.get(0).getConditions()) {
+			
 			String conditionName = goTermCondition.getCondition().getName();
+			
+			conditionsNames += "_" + conditionName + "_";
+			
 			Sheet sheet = workbook.createSheet(conditionName);
+			
 			Row headerRow = sheet.createRow(0);
 
 			for (int i = 0; i < COLUMNS.length; i++) {
+				
 				Cell cell = headerRow.createCell(i);
 				cell.setCellValue(COLUMNS[i]);
 			}
@@ -48,25 +56,32 @@ public class OutputService {
 			// populate the condition sheet
 			int rowNum = 1;
 			for (GoTerm goTerm : goTerms) {
+				System.out.println("##### excel row for: " + goTerm.getGoAnnotation().getId());
+
 				for (GoTermCondition goTermCondition2 : goTerm.getConditions()) {
+					
 					if (conditionName.equalsIgnoreCase(goTermCondition2.getCondition().getName())) {
 						Row row = sheet.createRow(rowNum++);
 
 						row.createCell(0).setCellValue(goTerm.getGoAnnotation().getGoId());
 
-						row.createCell(1).setCellValue(goTerm.getGoAnnotation().getSymbol());
+						row.createCell(1).setCellValue(goTerm.getGoAnnotation().getGoName());
+						
+						row.createCell(2).setCellValue(goTerm.getGoAnnotation().getSymbol());
 
-						row.createCell(2).setCellValue(goTerm.getGoAnnotation().getQualifier());
+						row.createCell(3).setCellValue(goTerm.getGoAnnotation().getQualifier());
 
-						row.createCell(3).setCellValue(goTerm.getGoAnnotation().getGoAspect().getAspect());
+						row.createCell(4).setCellValue(goTerm.getGoAnnotation().getGoAspect().getAspect());
+						
+						row.createCell(5).setCellValue(goTerm.getPvalueRatioAB());
 
-						row.createCell(4).setCellValue(goTermCondition2.getFinalPvalue());
+						row.createCell(6).setCellValue(goTermCondition2.getFinalPvalue());
 
-						row.createCell(5).setCellValue(goTermCondition2.getQvalue());
+						row.createCell(7).setCellValue(goTermCondition2.getQvalue());
 
-						row.createCell(6).setCellValue(goTermCondition2.getRank());
+						row.createCell(8).setCellValue(goTermCondition2.getRank());
 
-						row.createCell(7).setCellValue(goTermCondition2.getFinalWeight());
+						row.createCell(9).setCellValue(goTermCondition2.getFinalWeight());
 
 						StringBuilder coreProteins = new StringBuilder();
 
@@ -75,10 +90,10 @@ public class OutputService {
 							coreProteins.append(" ");
 						}
 
-						row.createCell(8).setCellValue(coreProteins.toString());
+						row.createCell(10).setCellValue(coreProteins.toString());
 						
-						row.createCell(9).setCellValue(goTermCondition2.getOriginalWeight());
-						row.createCell(10).setCellValue(goTermCondition2.getPvalueOriginal());
+						row.createCell(11).setCellValue(goTermCondition2.getOriginalWeight());
+						row.createCell(12).setCellValue(goTermCondition2.getPvalueOriginal());
 						
 						StringBuilder originalProteins = new StringBuilder();
 
@@ -86,7 +101,8 @@ public class OutputService {
 							originalProteins.append(protein.getProteinId());
 							originalProteins.append(" ");
 						}
-						row.createCell(11).setCellValue(originalProteins.toString());
+						
+						row.createCell(13).setCellValue(originalProteins.toString());
 
 						// adjust the cells width
 						for (int colNum = 0; colNum < row.getLastCellNum(); colNum++) {
@@ -98,8 +114,11 @@ public class OutputService {
 				}
 			}
 		}
-
+		
+		filePath = UPLOADED_FOLDER + "result" + conditionsNames + System.currentTimeMillis() + FILE_EXTENSION;
+		
 		FileOutputStream fileOut;
+		
 		try {
 			fileOut = new FileOutputStream(filePath);
 			workbook.write(fileOut);

@@ -1,14 +1,18 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import br.com.usp.labis.enums.GeneProductDatabaseEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ConnectedXrefs {
+public class ConnectedXrefs implements Serializable{
 
-	String db;
-	String id;
+	private static final long serialVersionUID = 1L;
+	
+	private String db;
+	private String id;
 
 	public String getDb() {
 		return db;

@@ -1,15 +1,18 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class NullDistribution {
+public class NullDistribution  implements Serializable{
 	
-	List<Protein> proteins;
-	List<Double> means;
-	List<Double> weights; //protein weights
-	Double cv;
-	Double pvalue;
-	Double weight; //sum of weights
+	private static final long serialVersionUID = 1L;
+	
+	private List<Protein> proteins;
+	private List<Double> means;
+	private List<Double> weights; //protein weights
+	private Double cv;
+	private Double pvalue;
+	private Double weight; //sum of weights
 	
 	public List<Protein> getProteins() {
 		return proteins;

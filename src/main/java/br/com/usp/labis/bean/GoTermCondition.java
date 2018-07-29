@@ -1,28 +1,31 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class GoTermCondition {
+public class GoTermCondition implements Serializable {
 
-	Condition condition;
-	List<Double> originalWeights;
-	Double originalWeight;
-	List<Double> originalMeans;
-	Double originalCv;
-	Double coreCv;
-	Double coreWeight;
-	Double pvalueOriginal;
-	Double pvalueCore;
-	Double finalPvalue;
-	Double finalWeight;
-	Double pvalueRecalculated;
-	Double maxStatisticTest;
-	List<Protein> originalProteins;
-	List<Protein> coreProteins;
-	List<NullDistribution> nullDistributionsOriginal;
-	List<NullDistribution> nullDistributionsCore;
-	Double qvalue;
-	Integer rank;
+	private static final long serialVersionUID = 1L;
+
+	private Condition condition;
+	private List<Double> originalWeights;
+	private Double originalWeight;
+	private List<Double> originalMeans;
+	private Double originalCv;
+	private Double coreCv;
+	private Double coreWeight;
+	private Double pvalueOriginal;
+	private Double pvalueCore;
+	private Double finalPvalue;
+	private Double finalWeight;
+	private Double pvalueRecalculated;
+	private Double maxStatisticTest;
+	private List<Protein> originalProteins;
+	private List<Protein> coreProteins;
+	private List<NullDistribution> nullDistributionsOriginal;
+	private List<NullDistribution> nullDistributionsCore;
+	private Double qvalue;
+	private Integer rank;
 
 	public Condition getCondition() {
 		return condition;
@@ -197,6 +200,8 @@ public class GoTermCondition {
 		result = prime * result + ((pvalueCore == null) ? 0 : pvalueCore.hashCode());
 		result = prime * result + ((pvalueOriginal == null) ? 0 : pvalueOriginal.hashCode());
 		result = prime * result + ((pvalueRecalculated == null) ? 0 : pvalueRecalculated.hashCode());
+		result = prime * result + ((qvalue == null) ? 0 : qvalue.hashCode());
+		result = prime * result + ((rank == null) ? 0 : rank.hashCode());
 		return result;
 	}
 
@@ -294,9 +299,17 @@ public class GoTermCondition {
 				return false;
 		} else if (!pvalueRecalculated.equals(other.pvalueRecalculated))
 			return false;
+		if (qvalue == null) {
+			if (other.qvalue != null)
+				return false;
+		} else if (!qvalue.equals(other.qvalue))
+			return false;
+		if (rank == null) {
+			if (other.rank != null)
+				return false;
+		} else if (!rank.equals(other.rank))
+			return false;
 		return true;
 	}
-
-
 	
 }

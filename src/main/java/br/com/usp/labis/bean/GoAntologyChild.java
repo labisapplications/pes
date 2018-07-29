@@ -1,9 +1,13 @@
 package br.com.usp.labis.bean;
 
-public class GoAntologyChild {
+import java.io.Serializable;
 
-	String id;
-	String relation;
+public class GoAntologyChild  implements Serializable{
+
+	private static final long serialVersionUID = 1L;
+	
+	private String id;
+	private String relation;
 	
 	public String getId() {
 		return id;
@@ -17,6 +21,7 @@ public class GoAntologyChild {
 	public void setRelation(String relation) {
 		this.relation = relation;
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

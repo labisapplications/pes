@@ -8,13 +8,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import br.com.usp.labis.bean.Condition;
@@ -22,7 +20,6 @@ import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
-import br.com.usp.labis.exception.CustomException;
 
 @Component
 public class DataUtil {
@@ -251,5 +248,15 @@ public class DataUtil {
 	    BigDecimal bd = new BigDecimal(Double.toString(value));
 	    bd = bd.setScale(places, RoundingMode.HALF_EVEN);
 	    return bd.doubleValue();
+	}
+	
+	public static int getRandomNumberInRange(int min, int max) {
+
+		if (min >= max) {
+			throw new IllegalArgumentException("max must be greater than min");
+		}
+
+		Random r = new Random();
+		return r.nextInt((max - min) + 1) + min;
 	}
 }

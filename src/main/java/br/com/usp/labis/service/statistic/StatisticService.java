@@ -200,7 +200,7 @@ public class StatisticService {
 	 **/
 	public void calculateProteinWeightForEachCondition(List<Protein> proteins, Map<String, Double> maxMeans,
 			Map<String, Double> maxCvs, Double maxStatisticTests) {
-		
+
 		System.out.println("maxStatisticTests: " + maxStatisticTests);
 		System.out.println("maxMeans: " + maxMeans);
 		System.out.println("maxCvs: " + maxCvs);
@@ -252,7 +252,7 @@ public class StatisticService {
 		for (GoTerm goTerm : goTerms) {
 
 			for (GoTermCondition condition : goTerm.getConditions()) {
-				
+
 				Double cv = calcCv(condition.getOriginalMeans());
 
 				if (cv == null) {
@@ -289,15 +289,15 @@ public class StatisticService {
 
 				if (conditionSelected == null
 						|| conditionSelected.equalsIgnoreCase(goTermCondition.getCondition().getName())) {
-					
+
 					List<NullDistribution> nullDistributions = new ArrayList<NullDistribution>();
 
 					for (int i = 0; i < numberOfNullDistributions; i++) {
-						
+
 						NullDistribution nullDistribution = new NullDistribution();
-						
+
 						nullDistribution.setMeans(new ArrayList<Double>());
-						
+
 						nullDistribution.setWeights(new ArrayList<Double>());
 
 						Integer proteinsSize = 0;
@@ -315,9 +315,9 @@ public class StatisticService {
 							for (Protein prot : proteinsRandomlySelected) {
 								for (Condition protCondition : prot.getConditions()) {
 									if (protCondition.getName().equals(goTermCondition.getCondition().getName())) {
-										
+
 										nullDistribution.getMeans().add(protCondition.getMean());
-										
+
 										nullDistribution.getWeights().add(protCondition.getWeight());
 									}
 								}
@@ -332,15 +332,15 @@ public class StatisticService {
 						// - toleranceFactor) * originalCv and (1 + toleranceFactor) * originalCv
 						if (nullDistribution.getCv() >= (1 - DataUtil.round(toleranceFactor, 2)) * cvToCompare
 								&& nullDistribution.getCv() <= (1 + DataUtil.round(toleranceFactor, 2) * cvToCompare)) {
-							
+
 							Double weight = 0.00;
-							
+
 							for (Double weightProtein : nullDistribution.getWeights()) {
 								weight += weightProtein;
 							}
-							
+
 							nullDistribution.setWeight(DataUtil.round(weight, 2));
-							
+
 						} else {
 							nullDistribution.setWeight(goTermCondition.getOriginalWeight());
 						}
@@ -349,11 +349,11 @@ public class StatisticService {
 					}
 
 					if (!isCore) {
-						
+
 						goTermCondition.setNullDistributionsOriginal(nullDistributions);
-						
+
 					} else {
-						
+
 						goTermCondition.setNullDistributionsCore(nullDistributions);
 					}
 				}
@@ -367,7 +367,7 @@ public class StatisticService {
 			List<Protein> proteinsOriginal) {
 
 		pvalueDesired = DataUtil.round(pvalueDesired, 2);
-		
+
 		toleranceFactor = DataUtil.round(toleranceFactor, 2);
 
 		for (GoTerm goTerm : goTerms) {
@@ -377,7 +377,7 @@ public class StatisticService {
 				// try to improve the pvalue if the calculated pvalue is higher than the desired
 				// and exists more than one protein in the protein set
 				if (goTermCondition.getPvalueOriginal() > pvalueDesired
-						&& goTermCondition.getOriginalProteins().size() > 1 ) {
+						&& goTermCondition.getOriginalProteins().size() > 1) {
 
 					List<Protein> originalProteins = goTermCondition.getOriginalProteins();
 
@@ -390,7 +390,7 @@ public class StatisticService {
 					// first: consider that the final pvalue and final weight are like the original
 					// ones
 					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
-					
+
 					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
 
 					// for each protein
@@ -402,16 +402,16 @@ public class StatisticService {
 								.collect(Collectors.toList());
 
 						List<Double> means = new ArrayList<Double>();
-						
+
 						List<Double> weights = new ArrayList<Double>();
 
 						// calculate the mean, weight and cv without the protein
 						for (Protein coreProt : core) {
 							for (Condition coreProtCond : coreProt.getConditions()) {
 								if (coreProtCond.getName().equals(goTermCondition.getCondition().getName())) {
-									
+
 									means.add(coreProtCond.getMean());
-									
+
 									weights.add(coreProtCond.getWeight());
 								}
 							}
@@ -420,21 +420,21 @@ public class StatisticService {
 						Double cv = this.calcCv(means);
 
 						Double weightSum = 0.00;
-						
+
 						for (Double weight : weights) {
-							
+
 							weightSum += weight;
 						}
 
 						goTermCondition.setCoreCv(cv);
-						
+
 						goTermCondition.setCoreWeight(DataUtil.round(weightSum, 2));
-						
+
 						goTermCondition.setCoreProteins(core);
 
 						// calc the null distribution and the core pvalue to this core protein set
 						List<GoTerm> goTermToGetNullDistributions = new ArrayList<GoTerm>();
-						
+
 						goTermToGetNullDistributions.add(goTerm);
 
 						this.getNullDistributions(numberOfNullDistributions, toleranceFactor,
@@ -460,13 +460,13 @@ public class StatisticService {
 						if (goTermCondition.getPvalueCore().compareTo(pvalueToCompare) < 0
 								&& (goTermCondition.getPvalueCore().compareTo(pvalueDesired) == 0
 										|| goTermCondition.getPvalueCore().compareTo(pvalueDesired) < 0)) {
-							
+
 							goTermCondition.setCoreProteins(core);
-							
+
 							goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
-							
+
 							goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
-							
+
 							break;
 						}
 
@@ -476,24 +476,24 @@ public class StatisticService {
 						originalProteinsOrdered = core;
 
 						if (originalProteinsOrdered.size() == 1) {
-							
+
 							// if after all the pvalue did not improve, then consider the original values
 							if (goTermCondition.getPvalueCore().compareTo(goTermCondition.getPvalueOriginal()) == 0
 									|| goTermCondition.getPvalueCore()
 											.compareTo(goTermCondition.getPvalueOriginal()) > 0) {
-								
+
 								goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
-								
+
 								goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
-								
+
 								goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
-								
+
 							} else {
-								
+
 								goTermCondition.setCoreProteins(core);
-								
+
 								goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
-								
+
 								goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
 							}
 							break;
@@ -503,165 +503,162 @@ public class StatisticService {
 				} else {
 
 					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
-					
+
 					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
-					
+
 					goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
 				}
 			}
 		}
 	}
-	
+
 	public void getCoreProteinsForGoTerm(GoTerm goTerm, Map<String, Double> maxMean, Map<String, Double> maxCv,
 			Double maxStatisticTest, Integer numberOfNullDistributions, Double toleranceFactor, Double pvalueDesired,
 			List<Protein> proteinsOriginal) {
 
 		pvalueDesired = DataUtil.round(pvalueDesired, 2);
-		
+
 		toleranceFactor = DataUtil.round(toleranceFactor, 2);
 
 		System.out.println("getCoreProteinsForGoTerm : " + goTerm.getGoAnnotation().getGoId());
-		
-		//for (GoTerm goTerm : goTerms) {
 
-			for (GoTermCondition goTermCondition : goTerm.getConditions()) {
+		// for (GoTerm goTerm : goTerms) {
 
-				// try to improve the pvalue if the calculated pvalue is higher than the desired
-				// and exists more than one protein in the protein set
-				if (goTermCondition.getPvalueOriginal() > pvalueDesired
-						&& goTermCondition.getOriginalProteins().size() > 1 ) {
+		for (GoTermCondition goTermCondition : goTerm.getConditions()) {
 
-					List<Protein> originalProteins = goTermCondition.getOriginalProteins();
+			// try to improve the pvalue if the calculated pvalue is higher than the desired
+			// and exists more than one protein in the protein set
+			if (goTermCondition.getPvalueOriginal() > pvalueDesired
+					&& goTermCondition.getOriginalProteins().size() > 1) {
 
-					Double pvalueToCompare = goTermCondition.getPvalueOriginal();
+				List<Protein> originalProteins = goTermCondition.getOriginalProteins();
 
-					// order the proteins by weight in ascending order
-					List<Protein> originalProteinsOrdered = DataUtil.orderProteinConditionWeightAsc(originalProteins,
-							goTermCondition.getCondition());
+				Double pvalueToCompare = goTermCondition.getPvalueOriginal();
 
-					// first: consider that the final pvalue and final weight are like the original
-					// ones
-					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
-					
-					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
+				// order the proteins by weight in ascending order
+				List<Protein> originalProteinsOrdered = DataUtil.orderProteinConditionWeightAsc(originalProteins,
+						goTermCondition.getCondition());
 
-					// for each protein
-					for (Protein originaProt : originalProteinsOrdered) {
+				// first: consider that the final pvalue and final weight are like the original
+				// ones
+				goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
 
-						// get a list without the protein to see if pvalue will get better without it
-						List<Protein> core = originalProteinsOrdered.stream()
-								.filter(i -> i.getProteinId() != originaProt.getProteinId())
-								.collect(Collectors.toList());
+				goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
 
-						List<Double> means = new ArrayList<Double>();
-						
-						List<Double> weights = new ArrayList<Double>();
+				// for each protein
+				for (Protein originaProt : originalProteinsOrdered) {
 
-						// calculate the mean, weight and cv without the protein
-						for (Protein coreProt : core) {
-							for (Condition coreProtCond : coreProt.getConditions()) {
-								if (coreProtCond.getName().equals(goTermCondition.getCondition().getName())) {
-									
-									means.add(coreProtCond.getMean());
-									
-									weights.add(coreProtCond.getWeight());
-								}
+					// get a list without the protein to see if pvalue will get better without it
+					List<Protein> core = originalProteinsOrdered.stream()
+							.filter(i -> i.getProteinId() != originaProt.getProteinId()).collect(Collectors.toList());
+
+					List<Double> means = new ArrayList<Double>();
+
+					List<Double> weights = new ArrayList<Double>();
+
+					// calculate the mean, weight and cv without the protein
+					for (Protein coreProt : core) {
+						for (Condition coreProtCond : coreProt.getConditions()) {
+							if (coreProtCond.getName().equals(goTermCondition.getCondition().getName())) {
+
+								means.add(coreProtCond.getMean());
+
+								weights.add(coreProtCond.getWeight());
 							}
-						}
-
-						Double cv = this.calcCv(means);
-
-						Double weightSum = 0.00;
-						
-						for (Double weight : weights) {
-							
-							weightSum += weight;
-						}
-
-						goTermCondition.setCoreCv(cv);
-						
-						goTermCondition.setCoreWeight(DataUtil.round(weightSum, 2));
-						
-						goTermCondition.setCoreProteins(core);
-
-						// calc the null distribution and the core pvalue to this core protein set
-						List<GoTerm> goTermToGetNullDistributions = new ArrayList<GoTerm>();
-						
-						goTermToGetNullDistributions.add(goTerm);
-
-						this.getNullDistributions(numberOfNullDistributions, toleranceFactor,
-								goTermToGetNullDistributions, goTermCondition.getCondition().getName(),
-								proteinsOriginal, true);
-
-						this.calcNullDistributionPvalues(goTermToGetNullDistributions, pvalueDesired, true);
-
-						/*
-						 * pvalue = goTermCondition.getPvalueOriginal();
-						 * 
-						 * //if the pvalue did not improve, stop if (goTermCondition.getPvalueCore() >=
-						 * pvalue) { goTermCondition.setCoreProteins(core); break; }
-						 * 
-						 * //continue until get a good pvalue or until exists just one protein in the
-						 * set pvalue = goTermCondition.getPvalueCore();
-						 * goTermCondition.setFinalPvalue(pvalue);
-						 * goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
-						 * originalProteinsOrdered = core;
-						 */
-
-						// if the pvalue was improved, stop because the goal was achieved!
-						if (goTermCondition.getPvalueCore().compareTo(pvalueToCompare) < 0
-								&& (goTermCondition.getPvalueCore().compareTo(pvalueDesired) == 0
-										|| goTermCondition.getPvalueCore().compareTo(pvalueDesired) < 0)) {
-							
-							goTermCondition.setCoreProteins(core);
-							
-							goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
-							
-							goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
-							
-							break;
-						}
-
-						// else continue until get a good core pvalue or until exists just one protein
-						// in the set
-						pvalueToCompare = goTermCondition.getPvalueCore();
-						originalProteinsOrdered = core;
-
-						if (originalProteinsOrdered.size() == 1) {
-							
-							// if after all the pvalue did not improve, then consider the original values
-							if (goTermCondition.getPvalueCore().compareTo(goTermCondition.getPvalueOriginal()) == 0
-									|| goTermCondition.getPvalueCore()
-											.compareTo(goTermCondition.getPvalueOriginal()) > 0) {
-								
-								goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
-								
-								goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
-								
-								goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
-								
-							} else {
-								
-								goTermCondition.setCoreProteins(core);
-								
-								goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
-								
-								goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
-							}
-							break;
 						}
 					}
 
-				} else {
+					Double cv = this.calcCv(means);
 
-					goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
-					
-					goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
-					
-					goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
+					Double weightSum = 0.00;
+
+					for (Double weight : weights) {
+
+						weightSum += weight;
+					}
+
+					goTermCondition.setCoreCv(cv);
+
+					goTermCondition.setCoreWeight(DataUtil.round(weightSum, 2));
+
+					goTermCondition.setCoreProteins(core);
+
+					// calc the null distribution and the core pvalue to this core protein set
+					List<GoTerm> goTermToGetNullDistributions = new ArrayList<GoTerm>();
+
+					goTermToGetNullDistributions.add(goTerm);
+
+					this.getNullDistributions(numberOfNullDistributions, toleranceFactor, goTermToGetNullDistributions,
+							goTermCondition.getCondition().getName(), proteinsOriginal, true);
+
+					this.calcNullDistributionPvalues(goTermToGetNullDistributions, pvalueDesired, true);
+
+					/*
+					 * pvalue = goTermCondition.getPvalueOriginal();
+					 * 
+					 * //if the pvalue did not improve, stop if (goTermCondition.getPvalueCore() >=
+					 * pvalue) { goTermCondition.setCoreProteins(core); break; }
+					 * 
+					 * //continue until get a good pvalue or until exists just one protein in the
+					 * set pvalue = goTermCondition.getPvalueCore();
+					 * goTermCondition.setFinalPvalue(pvalue);
+					 * goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+					 * originalProteinsOrdered = core;
+					 */
+
+					// if the pvalue was improved, stop because the goal was achieved!
+					if (goTermCondition.getPvalueCore().compareTo(pvalueToCompare) < 0
+							&& (goTermCondition.getPvalueCore().compareTo(pvalueDesired) == 0
+									|| goTermCondition.getPvalueCore().compareTo(pvalueDesired) < 0)) {
+
+						goTermCondition.setCoreProteins(core);
+
+						goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
+
+						goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+
+						break;
+					}
+
+					// else continue until get a good core pvalue or until exists just one protein
+					// in the set
+					pvalueToCompare = goTermCondition.getPvalueCore();
+					originalProteinsOrdered = core;
+
+					if (originalProteinsOrdered.size() == 1) {
+
+						// if after all the pvalue did not improve, then consider the original values
+						if (goTermCondition.getPvalueCore().compareTo(goTermCondition.getPvalueOriginal()) == 0
+								|| goTermCondition.getPvalueCore().compareTo(goTermCondition.getPvalueOriginal()) > 0) {
+
+							goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
+
+							goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
+
+							goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
+
+						} else {
+
+							goTermCondition.setCoreProteins(core);
+
+							goTermCondition.setFinalPvalue(goTermCondition.getPvalueCore());
+
+							goTermCondition.setFinalWeight(goTermCondition.getCoreWeight());
+						}
+						break;
+					}
 				}
+
+			} else {
+
+				goTermCondition.setFinalPvalue(goTermCondition.getPvalueOriginal());
+
+				goTermCondition.setFinalWeight(goTermCondition.getOriginalWeight());
+
+				goTermCondition.setCoreProteins(goTermCondition.getOriginalProteins());
 			}
-		//}
+		}
+		// }
 	}
 
 	public void calcNullDistributionPvalues(List<GoTerm> goTerms, Double pvalue, Boolean isCore) {
@@ -673,40 +670,41 @@ public class StatisticService {
 				List<NullDistribution> nullDistributions = !isCore ? goTermCondition.getNullDistributionsOriginal()
 						: goTermCondition.getNullDistributionsCore();
 
-				/*if (nullDistributions == null) {
-					throw new CustomException(messageSource.getMessage("messages.noNullDistributions",
-							new Object[] { isCore + ": " + goTerm.getGoAnnotation().getId() + " - "
-									+ goTermCondition.getCondition().getName() }, Locale.US));
-				}*/
+				/*
+				 * if (nullDistributions == null) { throw new
+				 * CustomException(messageSource.getMessage("messages.noNullDistributions", new
+				 * Object[] { isCore + ": " + goTerm.getGoAnnotation().getId() + " - " +
+				 * goTermCondition.getCondition().getName() }, Locale.US)); }
+				 */
 
 				if (nullDistributions != null && !nullDistributions.isEmpty()) {
 
 					List<Double> filteredWeight = new ArrayList<Double>();
 
 					Double numberOfDistributions = (double) nullDistributions.size();
-					
+
 					Double weightToCompare = !isCore ? goTermCondition.getOriginalWeight()
 							: goTermCondition.getCoreWeight();
 
 					// select the null distribution with higher or equal the the original weight
 					for (NullDistribution nullDistribution : nullDistributions) {
-						
+
 						if (nullDistribution.getWeight() >= weightToCompare) {
-							
+
 							filteredWeight.add(nullDistribution.getWeight());
 						}
 					}
 
 					Double pvalueCalculated = filteredWeight.size() / (numberOfDistributions + 0.000000001);
-					
+
 					pvalueCalculated = DataUtil.round(pvalueCalculated, 2);
 
 					if (!isCore) {
-						
+
 						goTermCondition.setPvalueOriginal(pvalueCalculated);
-						
+
 					} else {
-						
+
 						goTermCondition.setPvalueCore(pvalueCalculated);
 					}
 				}
@@ -720,9 +718,9 @@ public class StatisticService {
 			List<GoTermCondition> goTermConditions = new ArrayList<GoTermCondition>();
 
 			Map<String, List<Double>> weightsMap = new HashMap<String, List<Double>>();
-			
+
 			Map<String, List<Double>> meansMap = new HashMap<String, List<Double>>();
-			
+
 			Map<String, Condition> conditions = new HashMap<String, Condition>();
 
 			for (Protein proteinGoTerm : goTerm.getProteins()) {
@@ -733,20 +731,20 @@ public class StatisticService {
 
 						// weights
 						if (weightsMap.get(condition.getName()) == null) {
-							
+
 							weightsMap.put(condition.getName(), new ArrayList<Double>());
-							
+
 							conditions.put(condition.getName(), condition);
 						}
-						
+
 						weightsMap.get(condition.getName()).add(condition.getWeight());
 
 						// means
 						if (meansMap.get(condition.getName()) == null) {
-							
+
 							meansMap.put(condition.getName(), new ArrayList<Double>());
 						}
-						
+
 						meansMap.get(condition.getName()).add(condition.getMean());
 
 					}
@@ -756,36 +754,36 @@ public class StatisticService {
 			Iterator itWeights = weightsMap.entrySet().iterator();
 			try {
 				while (itWeights.hasNext()) {
-					
+
 					Map.Entry pairs = (Map.Entry) itWeights.next();
-					
+
 					GoTermCondition goTermCondition = new GoTermCondition();
-					
+
 					goTermCondition.setCondition(conditions.get(pairs.getKey()));
-					
+
 					goTermCondition.setOriginalWeights((List<Double>) pairs.getValue());
 
 					Double sumWeight = 0.00;
-					
+
 					for (Double weight : goTermCondition.getOriginalWeights()) {
-						
+
 						sumWeight += weight;
 					}
-					
+
 					goTermCondition.setOriginalWeight(DataUtil.round(sumWeight, 2));
-					
+
 					goTermCondition.setOriginalMeans(meansMap.get(goTermCondition.getCondition().getName()));
-					
+
 					goTermCondition.setOriginalProteins(goTerm.getProteins());
-					
+
 					goTermConditions.add(goTermCondition);
 				}
-				
+
 			} catch (RuntimeException e) {
 				throw new CustomException(messageSource.getMessage("messages.errorToSetGoTermCondition",
 						new Object[] { e.getMessage() }, Locale.US));
 			}
-			
+
 			goTerm.setConditions(goTermConditions);
 		}
 
@@ -810,7 +808,7 @@ public class StatisticService {
 			}
 
 			for (Condition condition : conditions) {
-
+				System.out.println("Processing the FDR calc for => " + condition.getName());
 				ArrayList<GoTermCondition> goTermConditionPvalueSorted = DataUtil
 						.orderGoTermConditionByPvalueAsc(goTerms, condition);
 
@@ -845,5 +843,86 @@ public class StatisticService {
 					new Object[] { e.getMessage() + " - " + e.getCause() }, Locale.US));
 		}
 
+	}
+
+	public void calcRatioBetweenConditions(List<GoTerm> goTerms, Integer numberOfDistributions) {
+		// if exists two conditions
+		if (goTerms.get(0).getConditions().size() == 2) {
+			this.calcRatioBetweenTwoConditions(goTerms, numberOfDistributions);
+		}
+		// TODO: if exists more than two conditions
+	}
+
+	public void calcRatioBetweenTwoConditions(List<GoTerm> goTerms, Integer numberOfDistributions) {
+
+		System.out.println("Calculating the ratio between the conditions");
+
+		for (GoTerm goTerm : goTerms) {
+			
+			List<Double> nullDistributionsRatio = new ArrayList<Double>();
+			Double quantityHigherThanRatioAB = 0.00;
+			Double pvalueRatioAB = 0.00;
+
+			Double weightConditionA = goTerm.getConditions().get(0).getFinalWeight() != null
+					? goTerm.getConditions().get(0).getFinalWeight()
+					: 0.00;
+					
+			Double weightConditionB = goTerm.getConditions().get(1).getFinalWeight() != null
+					? goTerm.getConditions().get(1).getFinalWeight()
+					: 0.00;
+					
+			Double ratioConditionsAB = 0.00;
+			try {
+				ratioConditionsAB = DataUtil.round((weightConditionA / weightConditionB), 2);
+			} catch (RuntimeException e) {
+				ratioConditionsAB = 0.00;
+			}
+
+			for (int i = 0; i < numberOfDistributions; i++) {
+								
+				Integer randomNum = DataUtil.getRandomNumberInRange(0,
+						goTerm.getConditions().get(0).getNullDistributionsOriginal().size()-1);
+				
+				NullDistribution nullDistributionA = goTerm.getConditions().get(0).getNullDistributionsOriginal()
+						.get(randomNum);
+				
+				Double weightNullDistConditionA = nullDistributionA.getWeight() != null
+						? nullDistributionA.getWeight() 
+						: 0.00;
+						
+				randomNum = DataUtil.getRandomNumberInRange(0,
+								goTerm.getConditions().get(1).getNullDistributionsOriginal().size()-1);
+				
+				
+				NullDistribution nullDistributionB = goTerm.getConditions().get(1).getNullDistributionsOriginal()
+						.get(randomNum);
+				
+				Double weightNullDistConditionB = nullDistributionB.getWeight() != null
+						? nullDistributionB.getWeight() 
+						: 0.00;
+				
+				Double nullDistConditionsRatioAB = 0.00;
+				try {
+					nullDistConditionsRatioAB = (weightNullDistConditionA / weightNullDistConditionB);
+					nullDistConditionsRatioAB = DataUtil.round(nullDistConditionsRatioAB, 2);
+				} catch (RuntimeException e) {
+					nullDistConditionsRatioAB = 0.00;
+				}
+						
+				
+				nullDistributionsRatio.add(nullDistConditionsRatioAB);
+			}
+			
+			for(Double nullRatioAB: nullDistributionsRatio) {
+				if(nullRatioAB > ratioConditionsAB ) {
+					quantityHigherThanRatioAB += 1.00;
+				}
+			}
+			
+			pvalueRatioAB = DataUtil.round( (quantityHigherThanRatioAB / numberOfDistributions) , 2);
+			
+			goTerm.setPvalueRatioAB(pvalueRatioAB);		
+
+		}
 	}
 }

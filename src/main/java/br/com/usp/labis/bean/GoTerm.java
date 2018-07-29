@@ -1,12 +1,17 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class GoTerm {
+public class GoTerm  implements Serializable{
 
-	GoAnnotation goAnnotation;
-	List<Protein> proteins;
-	List<GoTermCondition> conditions;
+	private static final long serialVersionUID = 1L;
+	
+	private GoAnnotation goAnnotation;
+	private List<Protein> proteins;
+	private List<GoTermCondition> conditions;
+	private Double pvalueRatioAB;
+
 	
 	public GoAnnotation getGoAnnotation() {
 		return goAnnotation;
@@ -26,6 +31,14 @@ public class GoTerm {
 	public void setConditions(List<GoTermCondition> conditions) {
 		this.conditions = conditions;
 	}
+	
+	public Double getPvalueRatioAB() {
+		return pvalueRatioAB;
+	}
+	public void setPvalueRatioAB(Double pvalueRatioAB) {
+		this.pvalueRatioAB = pvalueRatioAB;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

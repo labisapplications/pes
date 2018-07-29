@@ -1,19 +1,21 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
-
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoSearchGoAntologyResult  {
+public class GoSearchGoAntologyResult implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@JsonProperty
-	Integer numberOfHits;
+	private Integer numberOfHits;
 
 	@JsonProperty
-	List<GoAntology> results;
+	private List<GoAntology> results;
 
 	public Integer getNumberOfHits() {
 		return numberOfHits;

@@ -1,5 +1,6 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -7,13 +8,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import br.com.usp.labis.enums.GoAspectEnum;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoAntology {
+public class GoAntology  implements Serializable {
 	
-	String id;
-	Boolean isObsolete;
-	String name;
-	GoAspectEnum aspect;
-	List<GoAntologyChild> children;
+	private static final long serialVersionUID = 1L;
+	
+	private String id;
+	private Boolean isObsolete;
+	private String name;
+	private GoAspectEnum aspect;
+	private List<GoAntologyChild> children;
+	
 	public String getId() {
 		return id;
 	}

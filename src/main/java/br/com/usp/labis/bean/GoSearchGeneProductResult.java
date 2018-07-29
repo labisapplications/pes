@@ -1,5 +1,6 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -7,13 +8,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoSearchGeneProductResult  {
+public class GoSearchGeneProductResult  implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@JsonProperty
-	Integer numberOfHits;
+	private Integer numberOfHits;
 
 	@JsonProperty
-	List<GeneProduct> results;
+	private List<GeneProduct> results;
 
 	public Integer getNumberOfHits() {
 		return numberOfHits;

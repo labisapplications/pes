@@ -1,13 +1,16 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class WithFrom {
+public class WithFrom implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	List<ConnectedXrefs> connectedXrefs;
 
 	public List<ConnectedXrefs> getConnectedXrefs() {
@@ -34,7 +37,7 @@ public class WithFrom {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Extension other = (Extension) obj;
+		WithFrom other = (WithFrom) obj;
 		if (connectedXrefs == null) {
 			if (other.connectedXrefs != null)
 				return false;
@@ -42,5 +45,7 @@ public class WithFrom {
 			return false;
 		return true;
 	}
+
+
 
 }

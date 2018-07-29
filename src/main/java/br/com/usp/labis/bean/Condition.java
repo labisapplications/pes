@@ -1,13 +1,16 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Condition {
+public class Condition implements Serializable{
 
+	private static final long serialVersionUID = 1L;
+	
 	private String name;
 	private List<Replicate> replicates;
 	private Double mean;

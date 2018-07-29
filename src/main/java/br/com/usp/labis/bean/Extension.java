@@ -1,13 +1,16 @@
 package br.com.usp.labis.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Extension {
+public class Extension implements Serializable{
 
-	List<ConnectedXrefs> connectedXrefs;
+	private static final long serialVersionUID = 1L;
+	
+	private List<ConnectedXrefs> connectedXrefs;
 
 	public List<ConnectedXrefs> getConnectedXrefs() {
 		return connectedXrefs;
