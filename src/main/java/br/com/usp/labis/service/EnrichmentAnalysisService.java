@@ -54,8 +54,8 @@ public class EnrichmentAnalysisService {
 	@Autowired
 	private GoAnnotationService goAnnotationService;
 
-	@Autowired
-	private GoAntologyService goAntologyService;
+	//@Autowired
+	//private GoAntologyService goAntologyService;
 
 	@Autowired
 	private MessageSource messageSource;
@@ -68,6 +68,7 @@ public class EnrichmentAnalysisService {
 		List<GoTerm> goTerms = null;
 
 		try {
+			
 			goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
 					numberOfNullDistributions, pvalue);
 
@@ -93,6 +94,7 @@ public class EnrichmentAnalysisService {
 		List<GoTerm> goTerms = null;
 
 		try {
+			
 			goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
 					numberOfNullDistributions, pvalue);
 
@@ -121,23 +123,12 @@ public class EnrichmentAnalysisService {
 
 		Double maxStatisticTest = null; // max statistic test between conditions
 
-		/*
-		 * commented because it will read direct from inputstream without upload the
-		 * file to some folder // upload of data file to a temporary directory File
-		 * uploadedFile = uploadFileService.uploadExcelFile(file);
-		 * 
-		 * // process uploaded data file List<Protein> proteins =
-		 * excelReaderService.processExcelFile(uploadedFile);
-		 * 
-		 * // after process the data file, remove it from temporary directory
-		 * uploadFileService.removeUploadedFile(uploadedFile);
-		 */
-
 		// reading the file
 		List<Protein> proteins = excelReaderService.processExcelFile(file);
 
 		// filters to go annotations
 		GoAnnotationFilter filters = new GoAnnotationFilter();
+		
 		filters.setTaxonId(taxonId);
 
 		if (proteins != null && !proteins.isEmpty()) {
@@ -145,6 +136,7 @@ public class EnrichmentAnalysisService {
 			proteins = DataUtil.removeWhatIsNotProteinData(proteins);
 
 			if (proteins == null) {
+				
 				throw new CustomException(
 						messageSource.getMessage("messages.removeWhatIsNotProteinData", new Object[] {}, Locale.US));
 			}
@@ -156,37 +148,32 @@ public class EnrichmentAnalysisService {
 			this.getAnnotationsForProteins(proteins, filters, proteinsAnnotationNotFound);
 
 			System.out.println("Mapping go terms and proteins");
+			
 			// associate each go id to the proteins in the data file
 			goTerms = mapGoTermsAndProteins(proteins, minProteinsPerGoTerm);
 
 			if (goTerms == null || goTerms.isEmpty()) {
+				
 				throw new RuntimeException("Could not map go terms and min proteins ");
 			}
-
-			/*
-			 * for (GoTerm goTerm : goTerms) { String print =
-			 * goTerm.getGoAnnotation().getGoId() + " - proteins: "; StringBuilder prot =
-			 * new StringBuilder(); for (Protein protein : goTerm.getProteins()) {
-			 * prot.append(protein.getProteinId()); prot.append(" "); }
-			 * System.out.println(print + prot.toString());
-			 * 
-			 * }
-			 */
 
 			System.out.println("Calculating original go term weight");
 			statisticService.calculateGoTermWeight(goTerms, proteins, null);
 
 			System.out.println("Calculating the null distributions");
+			
 			// calculate the null distributions for randomly selected proteins
 			statisticService.getNullDistributions(numberOfNullDistributions, toleranceFactor, goTerms, null, proteins,
 					false);
 
 			System.out.println("Getting null distribution pvalues");
+			
 			// get the null distribution higher than pvalue for each condition
 			statisticService.calcNullDistributionPvalues(goTerms, pvalue, false);
 
 			// get the core proteins for each go term
 			System.out.println("Go Terms size:" + goTerms.size());
+			
 			System.out.println("Getting the core proteins");
 
 			GoCoreParams goCoreParams = new GoCoreParams();
@@ -208,6 +195,7 @@ public class EnrichmentAnalysisService {
 			statisticService.calcQValueUsingBenjaminiHochberg(goTerms, pvalue);
 
 		} else {
+			
 			throw new CustomException(messageSource.getMessage("messages.noProteins", new Object[] {}, Locale.US));
 		}
 
@@ -225,6 +213,7 @@ public class EnrichmentAnalysisService {
 		for (Protein protein : proteins) {
 
 			if (protein.getConditions() == null) {
+				
 				throw new CustomException(messageSource.getMessage("messages.proteinWithoutCondition",
 						new Object[] { protein.getProteinId() }, Locale.US));
 			}
@@ -234,27 +223,35 @@ public class EnrichmentAnalysisService {
 			System.out.println("-GENE => " + protein.getGeneNames());
 
 			try {
+				
 				for (Condition condition : protein.getConditions()) {
+					
 					System.out.println("--CONDITION => " + condition.getName());
 
 					if (condition.getReplicates() == null) {
+						
 						throw new CustomException(messageSource.getMessage("messages.conditionWithoutReplicates",
 								new Object[] { protein.getProteinId() + " - " + condition.getName() }, Locale.US));
 					}
 
 					for (Replicate replicate : condition.getReplicates()) {
+						
 						System.out.println("---REPLICATE => " + replicate.getValue());
 					}
 				}
 
 				// to calculate the ttest or anova test for protein (considering all conditions)
 				if (protein.getConditions().size() > 2) {
+					
 					protein.setStatisticTest(statisticService.oneWayAnovaTest(protein.getConditions()));
+					
 				} else {
+					
 					protein.setStatisticTest(statisticService.tTest(protein.getConditions()));
 				}
 
 			} catch (RuntimeException e) {
+				
 				throw new CustomException(messageSource.getMessage("messages.errorStatisticTest",
 						new Object[] { e.getMessage() + "- " + e.getCause() }, Locale.US));
 			}
@@ -266,11 +263,15 @@ public class EnrichmentAnalysisService {
 		}
 
 		DataUtil.getConditionCvs(proteins, conditionsCv);
+		
 		DataUtil.getConditionMeans(proteins, conditionsMean);
+		
 		DataUtil.getProteinsStatisticTest(proteins, statisticsTest);
 
 		statisticService.getMaxMean(conditionsMean, maxMean); // get the max mean per condition
+		
 		statisticService.getMaxCv(conditionsCv, maxCv); // get the max cv per condition
+		
 		Double maxStatisticTest = statisticService.getMaxStatisticTest(statisticsTest); // get the max statistic test
 																						// value (considering all
 																						// conditions)
@@ -283,11 +284,7 @@ public class EnrichmentAnalysisService {
 	private void getAnnotationsForProteins(List<Protein> proteins, GoAnnotationFilter filters,
 			List<Protein> proteinsAnnotationNotFound) {
 
-		/*for (Protein protein : proteins) {
-			System.out.println("Searching for annotations => Protein: " + protein.getProteinId());
-			this.executeGoWorker(protein, filters, null);
-		}*/
-		
+
 		this.getGoAnnotationsForEachProtein(proteins,  filters) ;
 
 		// try again
@@ -297,6 +294,7 @@ public class EnrichmentAnalysisService {
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
 				
 				System.out.println("Trying to get annotation for protein again: " + protein.getProteinId());
+				
 				this.goAnnotationService.getGoAnnotationsForProteinAndTaxon(protein, filters);
 			}
 		}
@@ -336,6 +334,7 @@ public class EnrichmentAnalysisService {
 			if (protein.getGoAnnotations() == null || protein.getGoAnnotations().isEmpty()) {
 				
 				System.out.println("Could not get annotation for => " + protein.getProteinId());
+				
 				proteinsAnnotationNotFound.add(protein);
 			}
 		}
@@ -346,26 +345,39 @@ public class EnrichmentAnalysisService {
 	private List<GoTerm> mapGoTermsAndProteins(List<Protein> proteins, Integer minProteinsPerGoTerm) {
 
 		List<GoTerm> listGoTerms = new ArrayList<GoTerm>();
+		
 		Map<String, List<Protein>> goTermWithProteins = new HashMap<String, List<Protein>>();
+		
 		Map<String, GoAnnotation> goAnnotation = new HashMap<String, GoAnnotation>();
+		
 		Integer countAnnotationsNotFound = 0;
+		
 		for (Protein protein : proteins) {
+			
 			if (protein.getGoAnnotations() != null && !protein.getGoAnnotations().isEmpty()) {
+				
 				for (GoAnnotation annotation : protein.getGoAnnotations()) {
+					
 					if (goTermWithProteins.get(annotation.getGoId()) == null) {
+						
 						goTermWithProteins.put(annotation.getGoId(), new ArrayList<Protein>());
+						
 						goAnnotation.put(annotation.getGoId(), annotation);
+						
 					}
 					if (!goTermWithProteins.get(annotation.getGoId()).contains(protein)) {
+						
 						goTermWithProteins.get(annotation.getGoId()).add(protein);
 					}
 				}
+				
 			} else {
 				countAnnotationsNotFound += 1;
 			}
 		}
 
 		if (countAnnotationsNotFound.equals(proteins.size())) {
+			
 			throw new CustomException(
 					messageSource.getMessage("messages.noGoAnnotationsFound", new Object[] {}, Locale.US));
 		}
@@ -375,11 +387,17 @@ public class EnrichmentAnalysisService {
 		while (it.hasNext()) {
 
 			Map.Entry pairs = (Map.Entry) it.next();
+			
 			List<Protein> proteinsGoTerm = (List<Protein>) pairs.getValue();
+			
 			if (proteinsGoTerm.size() >= minProteinsPerGoTerm) {
+				
 				GoTerm goTerm = new GoTerm();
+				
 				goTerm.setGoAnnotation(goAnnotation.get(pairs.getKey()));
+				
 				goTerm.setProteins(proteinsGoTerm);
+				
 				listGoTerms.add(goTerm);
 			}
 		}
@@ -408,11 +426,13 @@ public class EnrichmentAnalysisService {
 			tasks.add(runnable);
 		}
 
-		ExecutorService es = Executors.newFixedThreadPool(2);
+		ExecutorService es = Executors.newFixedThreadPool(4);
 
 		CompletableFuture<?>[] futures = tasks.stream().map(task -> CompletableFuture.runAsync(task, es))
 				.toArray(CompletableFuture[]::new);
+		
 		CompletableFuture.allOf(futures).join();
+		
 		es.shutdown();
 		
 		try {
@@ -422,7 +442,6 @@ public class EnrichmentAnalysisService {
 		} catch (InterruptedException e) {
 			
 			es.shutdownNow();
-			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -433,12 +452,16 @@ public class EnrichmentAnalysisService {
 		List<Runnable> tasks = new ArrayList<Runnable>();
 
 		for (GoTerm goTerm : goWorkerCoreParams.getGoTerms()) {
+			
 			Runnable runnable = () -> {
+				
 				try {
+					
 					statisticService.getCoreProteinsForGoTerm(goTerm, goWorkerCoreParams.getMaxMean(),
 							goWorkerCoreParams.getMaxCv(), goWorkerCoreParams.getMaxStatisticTest(),
 							goWorkerCoreParams.getNumberOfNullDistributions(), goWorkerCoreParams.getToleranceFactor(),
 							goWorkerCoreParams.getPvalueDesired(), goWorkerCoreParams.getProteinsOriginal());
+					
 				} catch (RuntimeException e) {
 					e.printStackTrace();
 				}
@@ -450,7 +473,9 @@ public class EnrichmentAnalysisService {
 
 		CompletableFuture<?>[] futures = tasks.stream().map(task -> CompletableFuture.runAsync(task, es))
 				.toArray(CompletableFuture[]::new);
+		
 		CompletableFuture.allOf(futures).join();
+		
 		es.shutdown();
 		
 		try {
@@ -460,7 +485,7 @@ public class EnrichmentAnalysisService {
 		} catch (InterruptedException e) {
 			
 			es.shutdownNow();
-			Thread.currentThread().interrupt();
+			
 		}
 	}
 
