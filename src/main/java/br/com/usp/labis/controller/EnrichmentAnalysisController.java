@@ -27,8 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 import br.com.usp.labis.bean.Result;
 import br.com.usp.labis.exception.ApiErrorResponse;
 import br.com.usp.labis.exception.CustomException;
-import br.com.usp.labis.service.EnrichmentAnalysisService;
-import br.com.usp.labis.service.file.OutputService;
+import br.com.usp.labis.service.IEnrichmentAnalysisService;
+import br.com.usp.labis.service.file.IOutputService;
 
 @RestController
 @CrossOrigin
@@ -36,16 +36,13 @@ import br.com.usp.labis.service.file.OutputService;
 public class EnrichmentAnalysisController {
 
 	@Autowired
-	private EnrichmentAnalysisService enrichmentAnalysisService;
+	private IEnrichmentAnalysisService enrichmentAnalysisService;
 
 	@Autowired
-	private OutputService outputService;
+	private IOutputService outputService;
 
 	@Autowired
 	private MessageSource messageSource;
-
-	// @Autowired
-	// private UploadFileService uploadFileService;
 
 	@PostMapping
 	@ResponseBody
@@ -107,12 +104,6 @@ public class EnrichmentAnalysisController {
 
 		return new ResponseEntity<>(fileSystemResource, headers, HttpStatus.OK);
 	}
-
-	/*
-	 * @GetMapping("delete") public void deleteFile(@RequestParam("fileName") String
-	 * fileName) { File file = outputService.getFileByName(fileName); if (file !=
-	 * null) { uploadFileService.removeUploadedFile(file); } }
-	 */
 
 	@ExceptionHandler(value = { CustomException.class })
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

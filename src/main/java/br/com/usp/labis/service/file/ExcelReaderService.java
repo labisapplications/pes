@@ -26,7 +26,7 @@ import br.com.usp.labis.bean.Replicate;
 import br.com.usp.labis.exception.CustomException;
 
 @Component
-public class ExcelReaderService {
+public class ExcelReaderService implements IExcelReaderService{
 
 	private final String PROTEIN_IDS = "Protein IDs";
 	private final String GENE_NAMES = "Gene names";

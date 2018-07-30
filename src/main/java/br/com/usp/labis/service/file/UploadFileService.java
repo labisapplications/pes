@@ -11,10 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 @Component
-public class UploadFileService {
+public class UploadFileService implements IUploadFileService {
 
-	 private final String UPLOADED_FOLDER = "C:" + File.separator +  "uploaded_file" + File.separator;
-	//private final String UPLOADED_FOLDER = System.getenv("OPENSHIFT_DATA_DIR") ;
+	private final String UPLOADED_FOLDER = "C:" + File.separator +  "uploaded_file" + File.separator;
 
 	private final String FILE_EXTENSION = ".XLS";
 
@@ -29,23 +28,6 @@ public class UploadFileService {
 
 		String newFileName = System.currentTimeMillis() + FILE_EXTENSION;
 		File uploadedFile = null;
-		
-		//TEST UPLOAD OPENSHIFT - BEGIN
-		try {
-			
-			byte[] bytes = file.getBytes();
-			File teste = new File("TestFile.txt");//full file path URL
-			String absolutePath = teste.getAbsolutePath();
-			System.out.println( "## absolutePath" + absolutePath);
-			
-			FileOutputStream out = new FileOutputStream("TestFile");
-			out.write(bytes);
-			out.close();
-			
-		} catch (Exception e) {
-			System.out.println("error teste openshift upload: " + e.getMessage() + e.getCause());
-		}
-		//TEST UPLOAD OPENSHIFT - END
 		
 		try {
 				

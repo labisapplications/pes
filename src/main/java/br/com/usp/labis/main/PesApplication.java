@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 @SpringBootApplication(scanBasePackages = { "br.com.usp.labis" })
-//public class PesApplication extends SpringBootServletInitializer {  //TO RUN ON WILDFLY
-public class PesApplication {
+public class PesApplication extends SpringBootServletInitializer {  //TO RUN ON WILDFLY
+//public class PesApplication {
 
 
 	public static void main(String[] args) {
@@ -26,9 +26,9 @@ public class PesApplication {
     }
 
 	//TO RUN ON WILDFLY 
-	/*@Override
+	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(PesApplication.class);
-	}*/
+	}
 
 }

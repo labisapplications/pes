@@ -23,39 +23,29 @@ import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Replicate;
 import br.com.usp.labis.bean.Result;
 import br.com.usp.labis.exception.CustomException;
-import br.com.usp.labis.service.file.ExcelReaderService;
-import br.com.usp.labis.service.file.OutputService;
-import br.com.usp.labis.service.go.GeneProductService;
+import br.com.usp.labis.service.file.IExcelReaderService;
+import br.com.usp.labis.service.file.IOutputService;
 import br.com.usp.labis.service.go.GoAnnotationService;
-import br.com.usp.labis.service.go.GoAntologyService;
-import br.com.usp.labis.service.statistic.StatisticService;
+import br.com.usp.labis.service.go.IGeneProductService;
+import br.com.usp.labis.service.statistic.IStatisticService;
 import br.com.usp.labis.useful.DataUtil;
 import br.com.usp.labis.useful.GoAnnotationFilter;
 import br.com.usp.labis.useful.GoCoreParams;
 
 @Component
-public class EnrichmentAnalysisService {
-
-	// @Autowired
-	// UploadFileService uploadFileService;
+public class EnrichmentAnalysisService implements IEnrichmentAnalysisService{
 
 	@Autowired
-	private OutputService outputService;
+	private IOutputService outputService;
 
 	@Autowired
-	private ExcelReaderService excelReaderService;
+	private IExcelReaderService excelReaderService;
 
 	@Autowired
-	private StatisticService statisticService;
-
-	@Autowired
-	private GeneProductService geneProductService;
+	private IStatisticService statisticService;
 
 	@Autowired
 	private GoAnnotationService goAnnotationService;
-
-	//@Autowired
-	//private GoAntologyService goAntologyService;
 
 	@Autowired
 	private MessageSource messageSource;

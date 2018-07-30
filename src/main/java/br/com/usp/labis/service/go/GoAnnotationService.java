@@ -13,7 +13,7 @@ import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.useful.GoAnnotationFilter;
 
 @Component
-public class GoAnnotationService {
+public class GoAnnotationService implements IGoAnnotationService{
 
 	private final String BASE_URL = "https://www.ebi.ac.uk/QuickGO/services/annotation/search";
 	private final String GO_NAME = "goName";

@@ -12,7 +12,7 @@ import br.com.usp.labis.bean.GoSearchGeneProductResult;
 import br.com.usp.labis.bean.Protein;
 
 @Component
-public class GeneProductService {
+public class GeneProductService implements IGeneProductService {
 
 	private final String BASE_URL = "https://www.ebi.ac.uk/QuickGO/services/geneproduct/search";
 

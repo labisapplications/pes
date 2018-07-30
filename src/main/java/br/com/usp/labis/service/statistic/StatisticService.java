@@ -24,7 +24,7 @@ import br.com.usp.labis.exception.CustomException;
 import br.com.usp.labis.useful.DataUtil;
 
 @Component
-public class StatisticService {
+public class StatisticService implements IStatisticService{
 
 	@Autowired
 	private MessageSource messageSource;

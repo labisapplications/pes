@@ -20,7 +20,7 @@ import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Result;
 
 @Component
-public class OutputService {
+public class OutputService implements IOutputService{
 
 	private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
 

@@ -12,7 +12,7 @@ import br.com.usp.labis.bean.GoAntology;
 import br.com.usp.labis.bean.GoSearchGoAntologyResult;
 
 @Component
-public class GoAntologyService {
+public class GoAntologyService implements IGoAntologyService {
 
 	private final String BASE_URL = "https://www.ebi.ac.uk/QuickGO/services/ontology/";
 	private final String TERMS = "go/terms/";
