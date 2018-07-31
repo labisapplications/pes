@@ -11,6 +11,7 @@ public class GoTerm  implements Serializable{
 	private List<Protein> proteins;
 	private List<GoTermCondition> conditions;
 	private Double pvalueRatioAB;
+	private Double pvalueRatioBA;
 
 	
 	public GoAnnotation getGoAnnotation() {
@@ -39,6 +40,12 @@ public class GoTerm  implements Serializable{
 		this.pvalueRatioAB = pvalueRatioAB;
 	}
 	
+	public Double getPvalueRatioBA() {
+		return pvalueRatioBA;
+	}
+	public void setPvalueRatioBA(Double pvalueRatioBA) {
+		this.pvalueRatioBA = pvalueRatioBA;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -46,6 +53,8 @@ public class GoTerm  implements Serializable{
 		result = prime * result + ((conditions == null) ? 0 : conditions.hashCode());
 		result = prime * result + ((goAnnotation == null) ? 0 : goAnnotation.hashCode());
 		result = prime * result + ((proteins == null) ? 0 : proteins.hashCode());
+		result = prime * result + ((pvalueRatioAB == null) ? 0 : pvalueRatioAB.hashCode());
+		result = prime * result + ((pvalueRatioBA == null) ? 0 : pvalueRatioBA.hashCode());
 		return result;
 	}
 	@Override
@@ -72,9 +81,17 @@ public class GoTerm  implements Serializable{
 				return false;
 		} else if (!proteins.equals(other.proteins))
 			return false;
+		if (pvalueRatioAB == null) {
+			if (other.pvalueRatioAB != null)
+				return false;
+		} else if (!pvalueRatioAB.equals(other.pvalueRatioAB))
+			return false;
+		if (pvalueRatioBA == null) {
+			if (other.pvalueRatioBA != null)
+				return false;
+		} else if (!pvalueRatioBA.equals(other.pvalueRatioBA))
+			return false;
 		return true;
 	}
-
-	
 	
 }

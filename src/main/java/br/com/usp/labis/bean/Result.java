@@ -18,6 +18,8 @@ public class Result implements Serializable {
 	private String core;
 	private String weight;
 	private String ratioAB;
+	private String ratioBA;
+
 	
 	public String getConditionName() {
 		return conditionName;
@@ -92,6 +94,13 @@ public class Result implements Serializable {
 	public void setRatioAB(String ratioAB) {
 		this.ratioAB = ratioAB;
 	}
+	
+	public String getRatioBA() {
+		return ratioBA;
+	}
+	public void setRatioBA(String ratioBA) {
+		this.ratioBA = ratioBA;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -101,10 +110,13 @@ public class Result implements Serializable {
 		result = prime * result + ((core == null) ? 0 : core.hashCode());
 		result = prime * result + ((geneName == null) ? 0 : geneName.hashCode());
 		result = prime * result + ((goId == null) ? 0 : goId.hashCode());
+		result = prime * result + ((goName == null) ? 0 : goName.hashCode());
 		result = prime * result + ((pvalue == null) ? 0 : pvalue.hashCode());
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
 		result = prime * result + ((qvalue == null) ? 0 : qvalue.hashCode());
 		result = prime * result + ((rank == null) ? 0 : rank.hashCode());
+		result = prime * result + ((ratioAB == null) ? 0 : ratioAB.hashCode());
+		result = prime * result + ((ratioBA == null) ? 0 : ratioBA.hashCode());
 		result = prime * result + ((weight == null) ? 0 : weight.hashCode());
 		return result;
 	}
@@ -142,6 +154,11 @@ public class Result implements Serializable {
 				return false;
 		} else if (!goId.equals(other.goId))
 			return false;
+		if (goName == null) {
+			if (other.goName != null)
+				return false;
+		} else if (!goName.equals(other.goName))
+			return false;
 		if (pvalue == null) {
 			if (other.pvalue != null)
 				return false;
@@ -161,6 +178,16 @@ public class Result implements Serializable {
 			if (other.rank != null)
 				return false;
 		} else if (!rank.equals(other.rank))
+			return false;
+		if (ratioAB == null) {
+			if (other.ratioAB != null)
+				return false;
+		} else if (!ratioAB.equals(other.ratioAB))
+			return false;
+		if (ratioBA == null) {
+			if (other.ratioBA != null)
+				return false;
+		} else if (!ratioBA.equals(other.ratioBA))
 			return false;
 		if (weight == null) {
 			if (other.weight != null)

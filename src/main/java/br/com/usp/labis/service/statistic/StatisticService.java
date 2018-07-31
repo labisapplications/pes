@@ -859,9 +859,17 @@ public class StatisticService implements IStatisticService{
 
 		for (GoTerm goTerm : goTerms) {
 			
-			List<Double> nullDistributionsRatio = new ArrayList<Double>();
+			List<Double> nullDistributionsRatioAB = new ArrayList<Double>();
+			
+			List<Double> nullDistributionsRatioBA = new ArrayList<Double>();
+			
 			Double quantityHigherThanRatioAB = 0.00;
+			
+			Double quantityHigherThanRatioBA = 0.00;
+			
 			Double pvalueRatioAB = 0.00;
+			
+			Double pvalueRatioBA = 0.00;
 
 			Double weightConditionA = goTerm.getConditions().get(0).getFinalWeight() != null
 					? goTerm.getConditions().get(0).getFinalWeight()
@@ -872,10 +880,18 @@ public class StatisticService implements IStatisticService{
 					: 0.00;
 					
 			Double ratioConditionsAB = 0.00;
+			
+			Double ratioConditionsBA = 0.00;
+
 			try {
+				
 				ratioConditionsAB = DataUtil.round((weightConditionA / weightConditionB), 2);
+				
+				ratioConditionsBA = DataUtil.round((weightConditionB / weightConditionA), 2);
+				
 			} catch (RuntimeException e) {
 				ratioConditionsAB = 0.00;
+				ratioConditionsBA = 0.00;
 			}
 
 			for (int i = 0; i < numberOfDistributions; i++) {
@@ -902,26 +918,51 @@ public class StatisticService implements IStatisticService{
 						: 0.00;
 				
 				Double nullDistConditionsRatioAB = 0.00;
+				
+				Double nullDistConditionsRatioBA = 0.00;
+				
 				try {
+					
 					nullDistConditionsRatioAB = (weightNullDistConditionA / weightNullDistConditionB);
+					
 					nullDistConditionsRatioAB = DataUtil.round(nullDistConditionsRatioAB, 2);
+					
+					nullDistConditionsRatioBA = (weightNullDistConditionB / weightNullDistConditionA);
+					
+					nullDistConditionsRatioBA = DataUtil.round(nullDistConditionsRatioBA, 2);
+					
 				} catch (RuntimeException e) {
 					nullDistConditionsRatioAB = 0.00;
-				}
-						
+					nullDistConditionsRatioBA = 0.00;
+				}					
 				
-				nullDistributionsRatio.add(nullDistConditionsRatioAB);
+				nullDistributionsRatioAB.add(nullDistConditionsRatioAB);
+				
+				nullDistributionsRatioBA.add(nullDistConditionsRatioBA);
+
 			}
 			
-			for(Double nullRatioAB: nullDistributionsRatio) {
+			for(Double nullRatioAB: nullDistributionsRatioAB) {
+				
 				if(nullRatioAB > ratioConditionsAB ) {
 					quantityHigherThanRatioAB += 1.00;
 				}
 			}
 			
+			for(Double nullRatioBA: nullDistributionsRatioBA) {
+				
+				if(nullRatioBA > ratioConditionsBA ) {
+					quantityHigherThanRatioBA += 1.00;
+				}
+			}
+			
 			pvalueRatioAB = DataUtil.round( (quantityHigherThanRatioAB / numberOfDistributions) , 2);
 			
+			pvalueRatioBA = DataUtil.round( (quantityHigherThanRatioBA / numberOfDistributions) , 2);
+			
 			goTerm.setPvalueRatioAB(pvalueRatioAB);		
+			
+			goTerm.setPvalueRatioBA(pvalueRatioBA);		
 
 		}
 	}

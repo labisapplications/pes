@@ -2,6 +2,8 @@ package br.com.usp.labis.service.file;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,9 +26,11 @@ public class OutputService implements IOutputService{
 
 	private final String UPLOADED_FOLDER = "C:" + File.separator + "uploaded_file" + File.separator;
 
-	private final String FILE_EXTENSION = ".XLS";
+	private final String FILE_EXTENSION_XLS = ".XLS";
+	
+	private final String FILE_EXTENSION_CSV = ".XLS";
 
-	private static String[] COLUMNS = { "GO_ID", "GO_NAME", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE_RATIO_A_B", "PVALUE", "QVALUE", "RANK", "WEIGHT",
+	private static String[] COLUMNS = { "GO_ID", "GO_NAME", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE_RATIO_A_B", "PVALUE_RATIO_B_A","PVALUE", "QVALUE", "RANK", "WEIGHT",
 			"CORE", "ORIGINAL_WEIGHT", "ORIGINAL_PVALUE", "ORIGINAL_PROTEINS" };
 
 	public String exportToExcel(List<GoTerm> goTerms) {
@@ -74,14 +78,16 @@ public class OutputService implements IOutputService{
 						row.createCell(4).setCellValue(goTerm.getGoAnnotation().getGoAspect().getAspect());
 						
 						row.createCell(5).setCellValue(goTerm.getPvalueRatioAB());
+						
+						row.createCell(6).setCellValue(goTerm.getPvalueRatioBA());
 
-						row.createCell(6).setCellValue(goTermCondition2.getFinalPvalue());
+						row.createCell(7).setCellValue(goTermCondition2.getFinalPvalue());
 
-						row.createCell(7).setCellValue(goTermCondition2.getQvalue());
+						row.createCell(8).setCellValue(goTermCondition2.getQvalue());
 
-						row.createCell(8).setCellValue(goTermCondition2.getRank());
+						row.createCell(9).setCellValue(goTermCondition2.getRank());
 
-						row.createCell(9).setCellValue(goTermCondition2.getFinalWeight());
+						row.createCell(10).setCellValue(goTermCondition2.getFinalWeight());
 
 						StringBuilder coreProteins = new StringBuilder();
 
@@ -90,10 +96,10 @@ public class OutputService implements IOutputService{
 							coreProteins.append(" ");
 						}
 
-						row.createCell(10).setCellValue(coreProteins.toString());
+						row.createCell(11).setCellValue(coreProteins.toString());
 						
-						row.createCell(11).setCellValue(goTermCondition2.getOriginalWeight());
-						row.createCell(12).setCellValue(goTermCondition2.getPvalueOriginal());
+						row.createCell(12).setCellValue(goTermCondition2.getOriginalWeight());
+						row.createCell(13).setCellValue(goTermCondition2.getPvalueOriginal());
 						
 						StringBuilder originalProteins = new StringBuilder();
 
@@ -102,7 +108,7 @@ public class OutputService implements IOutputService{
 							originalProteins.append(" ");
 						}
 						
-						row.createCell(13).setCellValue(originalProteins.toString());
+						row.createCell(14).setCellValue(originalProteins.toString());
 
 						// adjust the cells width
 						for (int colNum = 0; colNum < row.getLastCellNum(); colNum++) {
@@ -115,7 +121,7 @@ public class OutputService implements IOutputService{
 			}
 		}
 		
-		filePath = UPLOADED_FOLDER + "result" + conditionsNames + System.currentTimeMillis() + FILE_EXTENSION;
+		filePath = UPLOADED_FOLDER + "result" + conditionsNames + System.currentTimeMillis() + FILE_EXTENSION_XLS;
 		
 		FileOutputStream fileOut;
 		
@@ -131,6 +137,124 @@ public class OutputService implements IOutputService{
 
 		return filePath;
 	}
+	
+	public byte[] exportToCSV(List<GoTerm> goTerms) {
+		
+		StringBuilder output = new StringBuilder();
+
+		//String filePath = null;
+		
+		String conditionsNames = "";
+
+		for (GoTermCondition goTermCondition : goTerms.get(0).getConditions()) {
+			
+			String conditionName = goTermCondition.getCondition().getName();
+			
+			conditionsNames += "_" + conditionName + "_";
+						
+			for (int i = 0; i < COLUMNS.length; i++) {
+				
+				output.append(COLUMNS[i]);
+			}
+			
+			output.append('\n');
+
+			// populate the condition sheet
+			for (GoTerm goTerm : goTerms) {
+				
+				System.out.println("##### row for: " + goTerm.getGoAnnotation().getId());
+
+				for (GoTermCondition goTermCondition2 : goTerm.getConditions()) {
+					
+					if (conditionName.equalsIgnoreCase(goTermCondition2.getCondition().getName())) {
+						
+						output.append(goTerm.getGoAnnotation().getGoId());
+						
+						output.append(",");
+
+						output.append(goTerm.getGoAnnotation().getGoName());
+						
+						output.append(",");
+	
+						output.append(goTerm.getGoAnnotation().getSymbol());
+						
+						output.append(",");
+
+						output.append(goTerm.getGoAnnotation().getQualifier());
+						
+						output.append(",");
+						
+						output.append(goTerm.getGoAnnotation().getGoAspect().getAspect());
+						
+						output.append(",");
+	
+						output.append(goTerm.getPvalueRatioAB());
+						
+						output.append(",");
+						
+						output.append(goTerm.getPvalueRatioBA());
+						
+						output.append(",");
+
+						output.append(goTermCondition2.getFinalPvalue());
+						
+						output.append(",");
+
+						output.append(goTermCondition2.getQvalue());
+						
+						output.append(",");
+
+						output.append(goTermCondition2.getRank());
+						
+						output.append(",");
+
+						output.append(goTermCondition2.getFinalWeight());
+						
+						output.append(",");
+
+						StringBuilder coreProteins = new StringBuilder();
+
+						for (Protein protein : goTermCondition2.getCoreProteins()) {
+							
+							coreProteins.append(protein.getProteinId());
+							coreProteins.append(" ");
+						}
+
+						output.append(coreProteins.toString());
+						
+						output.append(",");
+					
+						output.append(goTermCondition2.getOriginalWeight());
+						
+						output.append(",");
+
+						output.append(goTermCondition2.getPvalueOriginal());
+						
+						output.append(",");
+
+						StringBuilder originalProteins = new StringBuilder();
+
+						for (Protein protein : goTermCondition2.getOriginalProteins()) {
+							
+							originalProteins.append(protein.getProteinId());
+							originalProteins.append(" ");
+						}
+						
+						output.append(originalProteins.toString());
+						
+						output.append('\n');
+
+					}
+				}
+			}
+		}
+		
+		//filePath = UPLOADED_FOLDER + "result" + conditionsNames + System.currentTimeMillis() + FILE_EXTENSION_CSV;
+		
+		byte[] bytesFromBuilder = output.toString().getBytes() != null ?  output.toString().getBytes() : null;
+			
+		return bytesFromBuilder;
+	}	
 
 	public Map<String, List<Result>> exportToMap(List<GoTerm> goTerms) {
 		Map<String, List<Result>> resultMap = new HashMap<String, List<Result>>();

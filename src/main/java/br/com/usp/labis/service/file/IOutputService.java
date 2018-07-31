@@ -17,4 +17,6 @@ public interface IOutputService {
 	Map<String, List<Result>> exportToMap(List<GoTerm> goTerms);
 	
 	File getFileByName(String fileName);
+	
+	byte[] exportToCSV(List<GoTerm> goTerms);
 }

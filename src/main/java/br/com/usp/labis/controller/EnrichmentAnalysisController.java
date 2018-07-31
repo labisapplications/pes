@@ -68,6 +68,28 @@ public class EnrichmentAnalysisController {
 
 		return resultFile;
 	}
+	
+	@PostMapping("csv")
+	@ResponseBody
+	public ResponseEntity<byte[]>  processEnrichmentAnalysisToCSV(@RequestParam("file") MultipartFile file,
+			@RequestParam("taxonId") Integer taxonId, @RequestParam("minProteins") Integer minProteins,
+			@RequestParam("toleranceFactor") Double toleranceFactor,
+			@RequestParam("nullDistributions") Integer nullDistributions, @RequestParam("pvalue") Double pvalue) {
+
+		byte[] data = enrichmentAnalysisService.processEnrichmentAnalysisToCSV(file, taxonId, minProteins,
+				toleranceFactor, nullDistributions, pvalue);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+		headers.add("Pragma", "no-cache");
+		headers.add("Expires", "0");
+		
+		System.out.println("data output: " + data);
+
+		return ResponseEntity.ok().headers(headers).contentLength(data.length)
+				.contentType(MediaType.parseMediaType("text/csv"))
+				.body(data);
+	}
 
 	@PostMapping("map")
 	@ResponseBody

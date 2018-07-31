@@ -13,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +29,6 @@ import br.com.usp.labis.exception.CustomException;
 import br.com.usp.labis.service.file.IExcelReaderService;
 import br.com.usp.labis.service.file.IOutputService;
 import br.com.usp.labis.service.go.GoAnnotationService;
-import br.com.usp.labis.service.go.IGeneProductService;
 import br.com.usp.labis.service.statistic.IStatisticService;
 import br.com.usp.labis.useful.DataUtil;
 import br.com.usp.labis.useful.GoAnnotationFilter;
@@ -76,6 +78,28 @@ public class EnrichmentAnalysisService implements IEnrichmentAnalysisService{
 		return resultFilePath;
 	}
 
+	public byte[] processEnrichmentAnalysisToCSV(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
+			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
+
+		byte[] data;
+
+		try {
+			
+			List<GoTerm> goTerms = processEnrichmentAnalysis(file, taxonId, minProteinsPerGoTerm, toleranceFactor,
+					numberOfNullDistributions, pvalue);
+
+			System.out.println("exporting to csv ...");
+
+			data  = outputService.exportToCSV(goTerms);
+
+		} catch (RuntimeException e) {
+			throw new CustomException(messageSource.getMessage("messages.errorAnalysis",
+					new Object[] { e.getMessage() + " -  " + e.getCause() }, Locale.US));
+		}
+		
+		return data;
+	}
+	
 	public Map<String, List<Result>> processEnrichmentAnalysisToMap(MultipartFile file, Integer taxonId,
 			Integer minProteinsPerGoTerm, Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) {
 

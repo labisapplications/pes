@@ -20,4 +20,7 @@ public interface IEnrichmentAnalysisService {
 	
 	List<GoTerm> processEnrichmentAnalysis(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
 			Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue); 
+	
+	byte[] processEnrichmentAnalysisToCSV(MultipartFile file, Integer taxonId, Integer minProteinsPerGoTerm,
+				Double toleranceFactor, Integer numberOfNullDistributions, Double pvalue) ;
 }
