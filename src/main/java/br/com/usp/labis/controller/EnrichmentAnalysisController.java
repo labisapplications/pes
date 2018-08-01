@@ -31,7 +31,7 @@ import br.com.usp.labis.service.IEnrichmentAnalysisService;
 import br.com.usp.labis.service.file.IOutputService;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(maxAge=3600)
 @RequestMapping("/pes")
 public class EnrichmentAnalysisController {
 
@@ -44,6 +44,7 @@ public class EnrichmentAnalysisController {
 	@Autowired
 	private MessageSource messageSource;
 
+	@CrossOrigin
 	@PostMapping
 	@ResponseBody
 	public String processEnrichmentAnalysisToExcel(@RequestParam("file") MultipartFile file,
@@ -69,6 +70,7 @@ public class EnrichmentAnalysisController {
 		return resultFile;
 	}
 	
+	@CrossOrigin
 	@PostMapping("csv")
 	@ResponseBody
 	public ResponseEntity<byte[]>  processEnrichmentAnalysisToCSV(@RequestParam("file") MultipartFile file,
@@ -91,6 +93,7 @@ public class EnrichmentAnalysisController {
 				.body(data);
 	}
 
+	@CrossOrigin
 	@PostMapping("map")
 	@ResponseBody
 	public Map<String, List<Result>> processEnrichmentAnalysisToMap(@RequestParam("file") MultipartFile file,
@@ -108,7 +111,8 @@ public class EnrichmentAnalysisController {
 		return resultMap;
 	}
 
-	@GetMapping("download2")
+	@CrossOrigin
+	@GetMapping("download")
 	public ResponseEntity<Resource> downloadFile(@RequestParam("fileName") String fileName) {
 
 		System.out.println("Downloading: " + fileName);
