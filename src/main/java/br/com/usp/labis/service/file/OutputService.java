@@ -282,6 +282,8 @@ public class OutputService implements IOutputService{
 				result.setGoId(goTerm.getGoAnnotation().getGoId());
 				result.setGeneName(goTerm.getGoAnnotation().getSymbol());
 				result.setQualifier(goTerm.getGoAnnotation().getQualifier());
+				result.setPvalueRatioAB(goTerm.getPvalueRatioAB() + "");
+				result.setPvalueRatioBA(goTerm.getPvalueRatioBA() + "");
 				result.setPvalue(goTermCondition.getFinalPvalue() + "");
 				result.setQvalue(goTermCondition.getQvalue() + "");
 				result.setRank(goTermCondition.getRank() + "");

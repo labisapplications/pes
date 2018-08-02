@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Result implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private String conditionName;
 	private String goId;
 	private String geneName;
@@ -17,90 +17,122 @@ public class Result implements Serializable {
 	private String rank;
 	private String core;
 	private String weight;
-	private String ratioAB;
+	private String pvalueRatioAB;
+	private String pvalueRatioBA;
 	private String ratioBA;
 
-	
 	public String getConditionName() {
 		return conditionName;
 	}
+
 	public void setConditionName(String conditionName) {
 		this.conditionName = conditionName;
 	}
+
 	public String getGoId() {
 		return goId;
 	}
+
 	public void setGoId(String goId) {
 		this.goId = goId;
 	}
+
 	public String getGeneName() {
 		return geneName;
 	}
+
 	public void setGeneName(String geneName) {
 		this.geneName = geneName;
 	}
+
 	public String getQualifier() {
 		return qualifier;
 	}
+
 	public void setQualifier(String qualifier) {
 		this.qualifier = qualifier;
 	}
+
 	public String getAspect() {
 		return aspect;
 	}
+
 	public void setAspect(String aspect) {
 		this.aspect = aspect;
 	}
+
 	public String getPvalue() {
 		return pvalue;
 	}
+
 	public void setPvalue(String pvalue) {
 		this.pvalue = pvalue;
 	}
+
 	public String getQvalue() {
 		return qvalue;
 	}
+
 	public void setQvalue(String qvalue) {
 		this.qvalue = qvalue;
 	}
+
 	public String getRank() {
 		return rank;
 	}
+
 	public void setRank(String rank) {
 		this.rank = rank;
 	}
+
 	public String getCore() {
 		return core;
 	}
+
 	public void setCore(String core) {
 		this.core = core;
 	}
+
 	public String getWeight() {
 		return weight;
 	}
+
 	public void setWeight(String weight) {
 		this.weight = weight;
 	}
-	
+
 	public String getGoName() {
 		return goName;
 	}
+
 	public void setGoName(String goName) {
 		this.goName = goName;
 	}
-	public String getRatioAB() {
-		return ratioAB;
-	}
-	public void setRatioAB(String ratioAB) {
-		this.ratioAB = ratioAB;
-	}
-	
+
 	public String getRatioBA() {
 		return ratioBA;
 	}
+
 	public void setRatioBA(String ratioBA) {
 		this.ratioBA = ratioBA;
 	}
+
+	public String getPvalueRatioAB() {
+		return pvalueRatioAB;
+	}
+
+	public void setPvalueRatioAB(String pvalueRatioAB) {
+		this.pvalueRatioAB = pvalueRatioAB;
+	}
+
+	public String getPvalueRatioBA() {
+		return pvalueRatioBA;
+	}
+
+	public void setPvalueRatioBA(String pvalueRatioBA) {
+		this.pvalueRatioBA = pvalueRatioBA;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -112,14 +144,16 @@ public class Result implements Serializable {
 		result = prime * result + ((goId == null) ? 0 : goId.hashCode());
 		result = prime * result + ((goName == null) ? 0 : goName.hashCode());
 		result = prime * result + ((pvalue == null) ? 0 : pvalue.hashCode());
+		result = prime * result + ((pvalueRatioAB == null) ? 0 : pvalueRatioAB.hashCode());
+		result = prime * result + ((pvalueRatioBA == null) ? 0 : pvalueRatioBA.hashCode());
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
 		result = prime * result + ((qvalue == null) ? 0 : qvalue.hashCode());
 		result = prime * result + ((rank == null) ? 0 : rank.hashCode());
-		result = prime * result + ((ratioAB == null) ? 0 : ratioAB.hashCode());
 		result = prime * result + ((ratioBA == null) ? 0 : ratioBA.hashCode());
 		result = prime * result + ((weight == null) ? 0 : weight.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -164,6 +198,16 @@ public class Result implements Serializable {
 				return false;
 		} else if (!pvalue.equals(other.pvalue))
 			return false;
+		if (pvalueRatioAB == null) {
+			if (other.pvalueRatioAB != null)
+				return false;
+		} else if (!pvalueRatioAB.equals(other.pvalueRatioAB))
+			return false;
+		if (pvalueRatioBA == null) {
+			if (other.pvalueRatioBA != null)
+				return false;
+		} else if (!pvalueRatioBA.equals(other.pvalueRatioBA))
+			return false;
 		if (qualifier == null) {
 			if (other.qualifier != null)
 				return false;
@@ -179,11 +223,6 @@ public class Result implements Serializable {
 				return false;
 		} else if (!rank.equals(other.rank))
 			return false;
-		if (ratioAB == null) {
-			if (other.ratioAB != null)
-				return false;
-		} else if (!ratioAB.equals(other.ratioAB))
-			return false;
 		if (ratioBA == null) {
 			if (other.ratioBA != null)
 				return false;
@@ -198,5 +237,5 @@ public class Result implements Serializable {
 	}
 	
 	
-	
+
 }
