@@ -483,7 +483,7 @@ public class EnrichmentAnalysisService implements IEnrichmentAnalysisService{
 			tasks.add(runnable);
 		}
 
-		ExecutorService es = Executors.newFixedThreadPool(20);
+		ExecutorService es = Executors.newFixedThreadPool(40);
 
 		CompletableFuture<?>[] futures = tasks.stream().map(task -> CompletableFuture.runAsync(task, es))
 				.toArray(CompletableFuture[]::new);
