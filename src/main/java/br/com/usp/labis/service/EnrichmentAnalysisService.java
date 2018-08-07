@@ -272,7 +272,7 @@ public class EnrichmentAnalysisService implements IEnrichmentAnalysisService{
 
 			// calculate mean and cv for each protein condition
 			statisticService.calculateProteinConditionMeanAndCv(protein);
-
+			
 			System.out.println("-------------------end--------------------");
 		}
 
@@ -291,7 +291,13 @@ public class EnrichmentAnalysisService implements IEnrichmentAnalysisService{
 																						// conditions)
 
 		statisticService.calculateProteinWeightForEachCondition(proteins, maxMean, maxCv, maxStatisticTest);
+		
+		System.out.println("--- exporting -----");
 
+		outputService.exportProteinsStatisticsToExcel(proteins);
+
+		System.out.println("--- exported -----");
+		
 		return maxStatisticTest;
 	}
 

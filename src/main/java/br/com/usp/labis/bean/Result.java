@@ -20,7 +20,13 @@ public class Result implements Serializable {
 	private String pvalueRatioAB;
 	private String pvalueRatioBA;
 	private String ratioBA;
+	
+	private String originalWeight;
+	private String originalCore;
+	private String originalPvalue;
+	private String details;
 
+	
 	public String getConditionName() {
 		return conditionName;
 	}
@@ -133,6 +139,39 @@ public class Result implements Serializable {
 		this.pvalueRatioBA = pvalueRatioBA;
 	}
 
+	public String getOriginalWeight() {
+		return originalWeight;
+	}
+
+	public void setOriginalWeight(String originalWeight) {
+		this.originalWeight = originalWeight;
+	}
+
+	public String getOriginalCore() {
+		return originalCore;
+	}
+
+	public void setOriginalCore(String originalCore) {
+		this.originalCore = originalCore;
+	}
+
+	public String getOriginalPvalue() {
+		return originalPvalue;
+	}
+
+	public void setOriginalPvalue(String originalPvalue) {
+		this.originalPvalue = originalPvalue;
+	}
+	
+
+	public String getDetails() {
+		return details;
+	}
+
+	public void setDetails(String details) {
+		this.details = details;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -143,6 +182,9 @@ public class Result implements Serializable {
 		result = prime * result + ((geneName == null) ? 0 : geneName.hashCode());
 		result = prime * result + ((goId == null) ? 0 : goId.hashCode());
 		result = prime * result + ((goName == null) ? 0 : goName.hashCode());
+		result = prime * result + ((originalCore == null) ? 0 : originalCore.hashCode());
+		result = prime * result + ((originalPvalue == null) ? 0 : originalPvalue.hashCode());
+		result = prime * result + ((originalWeight == null) ? 0 : originalWeight.hashCode());
 		result = prime * result + ((pvalue == null) ? 0 : pvalue.hashCode());
 		result = prime * result + ((pvalueRatioAB == null) ? 0 : pvalueRatioAB.hashCode());
 		result = prime * result + ((pvalueRatioBA == null) ? 0 : pvalueRatioBA.hashCode());
@@ -193,6 +235,21 @@ public class Result implements Serializable {
 				return false;
 		} else if (!goName.equals(other.goName))
 			return false;
+		if (originalCore == null) {
+			if (other.originalCore != null)
+				return false;
+		} else if (!originalCore.equals(other.originalCore))
+			return false;
+		if (originalPvalue == null) {
+			if (other.originalPvalue != null)
+				return false;
+		} else if (!originalPvalue.equals(other.originalPvalue))
+			return false;
+		if (originalWeight == null) {
+			if (other.originalWeight != null)
+				return false;
+		} else if (!originalWeight.equals(other.originalWeight))
+			return false;
 		if (pvalue == null) {
 			if (other.pvalue != null)
 				return false;
@@ -235,7 +292,7 @@ public class Result implements Serializable {
 			return false;
 		return true;
 	}
-	
+
 	
 
 }

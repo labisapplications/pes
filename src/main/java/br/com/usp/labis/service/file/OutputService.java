@@ -2,8 +2,6 @@ package br.com.usp.labis.service.file;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +14,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+import br.com.usp.labis.bean.Condition;
 import br.com.usp.labis.bean.GoTerm;
 import br.com.usp.labis.bean.GoTermCondition;
 import br.com.usp.labis.bean.Protein;
@@ -32,7 +31,76 @@ public class OutputService implements IOutputService{
 
 	private static String[] COLUMNS = { "GO_ID", "GO_NAME", "GENE", "QUALIFIER", "GO_ASPECT", "PVALUE_RATIO_A_B", "PVALUE_RATIO_B_A","PVALUE", "QVALUE", "RANK", "WEIGHT",
 			"CORE", "ORIGINAL_WEIGHT", "ORIGINAL_PVALUE", "ORIGINAL_PROTEINS" };
+	
+	private static String[] COLUMNS_TEST = { "PROTEIN", "CONDITION_A", "MEAN_A", "CV_A", "SD_A", "WEIGHT_A","CONDITION_B", "MEAN_B", "CV_B", "SD_B", "WEIGHT_B"};
 
+	public void exportProteinsStatisticsToExcel(List<Protein> proteins) {
+
+		String filePath = null;
+		
+		Workbook workbook = new XSSFWorkbook(); 
+		
+		Sheet sheet = workbook.createSheet("PROTEINS_DATA");
+		
+		Row headerRow = sheet.createRow(0);
+
+		for (int i = 0; i < COLUMNS_TEST.length; i++) {
+			
+			Cell cell = headerRow.createCell(i);
+			cell.setCellValue(COLUMNS_TEST[i]);
+		}
+
+		int rowNum = 1;
+		
+		for (Protein prot : proteins) {
+
+			Row row = sheet.createRow(rowNum++);
+
+			row.createCell(0).setCellValue(prot.getProteinId());
+
+			row.createCell(1).setCellValue(prot.getConditions().get(0).getName());
+						
+			row.createCell(2).setCellValue(prot.getConditions().get(0).getMean());
+			
+			row.createCell(3).setCellValue(prot.getConditions().get(0).getCv());
+			
+			row.createCell(4).setCellValue(prot.getConditions().get(0).getSd());
+			
+			row.createCell(5).setCellValue(prot.getConditions().get(0).getWeight());
+			
+			row.createCell(6).setCellValue(prot.getConditions().get(1).getName());
+			
+			row.createCell(7).setCellValue(prot.getConditions().get(1).getMean());
+
+			row.createCell(8).setCellValue(prot.getConditions().get(1).getCv());
+
+			row.createCell(9).setCellValue(prot.getConditions().get(1).getSd());
+
+			row.createCell(10).setCellValue(prot.getConditions().get(1).getWeight());
+
+			// adjust the cells width
+			for (int colNum = 0; colNum < row.getLastCellNum(); colNum++) {
+				sheet.autoSizeColumn(colNum);
+			}
+						
+		}
+		
+		filePath = UPLOADED_FOLDER + "PROTEINS_STATISTIC"+ System.currentTimeMillis() + FILE_EXTENSION_XLS;
+		
+		FileOutputStream fileOut;
+		
+		try {
+			fileOut = new FileOutputStream(filePath);
+			workbook.write(fileOut);
+			fileOut.close();
+			// Closing the workbook
+			workbook.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public String exportToExcel(List<GoTerm> goTerms) {
 
 		String filePath = null;
@@ -290,7 +358,33 @@ public class OutputService implements IOutputService{
 				result.setRank(goTermCondition.getRank() + "");
 				result.setWeight(goTermCondition.getFinalWeight() + "");
 				result.setCore(coreProteins.toString());
-
+				
+				result.setOriginalWeight(goTermCondition.getOriginalWeight()+"");
+				result.setOriginalPvalue(goTermCondition.getPvalueOriginal()+"");
+				
+				StringBuilder originalProteins = new StringBuilder();
+				for (Protein protein : goTermCondition.getOriginalProteins()) {
+					originalProteins.append(protein.getProteinId());
+					originalProteins.append(" ");
+				}
+				result.setOriginalCore(originalProteins.toString());
+				
+				StringBuilder details = new StringBuilder();
+				for (Protein protein : goTermCondition.getOriginalProteins()) {
+					details.append(protein.getProteinId());
+					details.append(" ");
+					for (Condition proteinCondition : protein.getConditions()) {
+						details.append(" Condition :" + proteinCondition.getName());
+						details.append(" Mean:" + proteinCondition.getMean());
+						details.append(" CV:" + proteinCondition.getCv());
+						details.append(" sd:" + proteinCondition.getSd());
+						details.append(" weight:" + proteinCondition.getWeight());
+						details.append(" / ");
+					}
+					details.append(" ; ");
+				}
+				result.setDetails(details.toString());
+				
 				resultMap.get(goTermCondition.getCondition().getName()).add(result);
 			}
 		}

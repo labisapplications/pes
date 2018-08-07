@@ -112,4 +112,5 @@ public interface IStatisticService {
 	void calcRatioBetweenConditions(List<GoTerm> goTerms, Integer numberOfDistributions) ;
 
 	void calcRatioBetweenTwoConditions(List<GoTerm> goTerms, Integer numberOfDistributions) ;
+
 }

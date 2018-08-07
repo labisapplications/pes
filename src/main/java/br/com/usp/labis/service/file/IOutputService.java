@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import br.com.usp.labis.bean.GoTerm;
+import br.com.usp.labis.bean.Protein;
 import br.com.usp.labis.bean.Result;
 
 @Component
@@ -19,4 +20,6 @@ public interface IOutputService {
 	File getFileByName(String fileName);
 	
 	byte[] exportToCSV(List<GoTerm> goTerms);
+	
+	void exportProteinsStatisticsToExcel(List<Protein> proteins);
 }

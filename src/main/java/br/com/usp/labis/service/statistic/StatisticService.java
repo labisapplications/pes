@@ -228,7 +228,7 @@ public class StatisticService implements IStatisticService{
 				 * : weight;
 				 */
 
-				Double cvProtCondition = condition.getMean() / (condition.getSd() + DEAL_WITH_ZERO_DEVISION);
+				Double cvProtCondition = condition.getSd() / (condition.getMean()  + DEAL_WITH_ZERO_DEVISION);
 
 				Double meanProtCondition = condition.getMean();
 
