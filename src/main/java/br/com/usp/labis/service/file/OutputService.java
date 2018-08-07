@@ -281,6 +281,7 @@ public class OutputService implements IOutputService{
 				result.setAspect(goTerm.getGoAnnotation().getGoAspect().getAspect());
 				result.setGoId(goTerm.getGoAnnotation().getGoId());
 				result.setGeneName(goTerm.getGoAnnotation().getSymbol());
+				result.setGoName(goTerm.getGoAnnotation().getGoName());
 				result.setQualifier(goTerm.getGoAnnotation().getQualifier());
 				result.setPvalueRatioAB(goTerm.getPvalueRatioAB() + "");
 				result.setPvalueRatioBA(goTerm.getPvalueRatioBA() + "");
