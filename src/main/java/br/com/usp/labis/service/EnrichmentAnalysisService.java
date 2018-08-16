@@ -292,11 +292,12 @@ public class EnrichmentAnalysisService implements IEnrichmentAnalysisService{
 
 		statisticService.calculateProteinWeightForEachCondition(proteins, maxMean, maxCv, maxStatisticTest);
 		
-		System.out.println("--- exporting -----");
+		/*System.out.println("--- exporting -----");
 
 		outputService.exportProteinsStatisticsToExcel(proteins);
 
 		System.out.println("--- exported -----");
+		*/
 		
 		return maxStatisticTest;
 	}

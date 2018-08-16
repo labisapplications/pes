@@ -246,7 +246,7 @@ public class DataUtil {
 	    if (places < 0) throw new IllegalArgumentException();
 	 
 	    BigDecimal bd = new BigDecimal(Double.toString(value));
-	    bd = bd.setScale(places, RoundingMode.HALF_EVEN);
+	    bd = bd.setScale(places, RoundingMode.HALF_DOWN);
 	    return bd.doubleValue();
 	}
 	

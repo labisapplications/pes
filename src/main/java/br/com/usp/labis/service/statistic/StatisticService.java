@@ -863,9 +863,9 @@ public class StatisticService implements IStatisticService{
 			
 			List<Double> nullDistributionsRatioBA = new ArrayList<Double>();
 			
-			Double quantityHigherThanRatioAB = 0.00;
+			Double quantityEqualOrHigherThanRatioAB = 0.00;
 			
-			Double quantityHigherThanRatioBA = 0.00;
+			Double quantityEqualOrHigherThanRatioBA = 0.00;
 			
 			Double pvalueRatioAB = 0.00;
 			
@@ -944,21 +944,21 @@ public class StatisticService implements IStatisticService{
 			
 			for(Double nullRatioAB: nullDistributionsRatioAB) {
 				
-				if(nullRatioAB > ratioConditionsAB ) {
-					quantityHigherThanRatioAB += 1.00;
+				if(nullRatioAB >= ratioConditionsAB ) {
+					quantityEqualOrHigherThanRatioAB += 1.00;
 				}
 			}
 			
 			for(Double nullRatioBA: nullDistributionsRatioBA) {
 				
-				if(nullRatioBA > ratioConditionsBA ) {
-					quantityHigherThanRatioBA += 1.00;
+				if(nullRatioBA >= ratioConditionsBA ) {
+					quantityEqualOrHigherThanRatioBA += 1.00;
 				}
 			}
 			
-			pvalueRatioAB = DataUtil.round( (quantityHigherThanRatioAB / numberOfDistributions) , 2);
+			pvalueRatioAB = DataUtil.round( (quantityEqualOrHigherThanRatioAB / numberOfDistributions) , 2);
 			
-			pvalueRatioBA = DataUtil.round( (quantityHigherThanRatioBA / numberOfDistributions) , 2);
+			pvalueRatioBA = DataUtil.round( (quantityEqualOrHigherThanRatioBA / numberOfDistributions) , 2);
 			
 			goTerm.setPvalueRatioAB(pvalueRatioAB);		
 			

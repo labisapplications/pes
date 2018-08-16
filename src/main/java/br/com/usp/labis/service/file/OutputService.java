@@ -372,7 +372,7 @@ public class OutputService implements IOutputService{
 				StringBuilder details = new StringBuilder();
 				for (Protein protein : goTermCondition.getOriginalProteins()) {
 					details.append(protein.getProteinId());
-					details.append(" ");
+					/*details.append(" ");
 					for (Condition proteinCondition : protein.getConditions()) {
 						details.append(" Condition :" + proteinCondition.getName());
 						details.append(" Mean:" + proteinCondition.getMean());
@@ -380,7 +380,7 @@ public class OutputService implements IOutputService{
 						details.append(" sd:" + proteinCondition.getSd());
 						details.append(" weight:" + proteinCondition.getWeight());
 						details.append(" / ");
-					}
+					}*/
 					details.append(" ; ");
 				}
 				result.setDetails(details.toString());
